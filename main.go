@@ -18,16 +18,17 @@ var box = &RequestBox{notifier.NewNotiManager()}
 func main() {
 	r := gin.Default()
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	r.Static("/", "./static")
 
-	r.GET("/wait", WaitHandler)
-	r.GET("/waitwithchan", WaitWithChannelHandler)
+	// r.GET("/ping", func(c *gin.Context) {
+	// 	c.JSON(200, gin.H{
+	// 		"message": "pong",
+	// 	})
+	// })
 
-	go routine()
+	// r.GET("/wait", WaitHandler)
+	// r.GET("/waitwithchan", WaitWithChannelHandler)
+
 	r.Run(":8000") // listen and serve on 0.0.0.0:8080
 
 }
