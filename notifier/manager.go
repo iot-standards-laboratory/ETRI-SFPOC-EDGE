@@ -1,23 +1,54 @@
 package notifier
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"sync"
+)
 
 type INotiManager interface {
 	AddSubscriber(s ISubscriber)
 	Publish(e IEvent)
+	RemoveSubscriber(s ISubscriber)
 }
 
 type NotiManager struct {
 	subscribers map[string][]ISubscriber
+	mutex       sync.Mutex
 }
 
 func NewNotiManager() *NotiManager {
-	return &NotiManager{map[string][]ISubscriber{}}
+	return &NotiManager{map[string][]ISubscriber{}, sync.Mutex{}}
 }
 
 func (nm *NotiManager) AddSubscriber(s ISubscriber) {
+	nm.mutex.Lock()
+	defer nm.mutex.Unlock()
 	nm.subscribers[s.Token()] = append(nm.subscribers[s.Token()], s)
 	fmt.Println(nm.subscribers)
+}
+
+func (nm *NotiManager) RemoveSubscriber(s ISubscriber) {
+	sublist, ok := nm.subscribers[s.Token()]
+	if !ok {
+		return
+	}
+
+	nm.mutex.Lock()
+	defer nm.mutex.Unlock()
+
+	for i, e := range sublist {
+		if e == s {
+			sublist[i] = sublist[len(sublist)-1]
+			if len(sublist)-1 == 0 {
+				delete(nm.subscribers, s.Token())
+			} else {
+				nm.subscribers[s.Token()] = sublist[:len(sublist)-1]
+			}
+		}
+	}
+
+	log.Println(nm.subscribers)
 }
 
 func (nm *NotiManager) Publish(e IEvent) {
@@ -26,12 +57,14 @@ func (nm *NotiManager) Publish(e IEvent) {
 		return
 	}
 
+	nm.mutex.Lock()
+	defer nm.mutex.Unlock()
+
 	tail := len(sublist) - 1
 	idx := 0
 	for idx <= tail {
 		sublist[idx].Handle(e)
 		if sublist[idx].Type() == SubtypeOnce {
-			// sublist = append(sublist[:i], sublist[i+1:]...)
 			sublist[idx], sublist[tail] = sublist[tail], sublist[idx]
 			tail--
 		} else {

@@ -2,9 +2,15 @@ module etri-sfpoc-edge
 
 go 1.17
 
+replace etrisfpocctnmgmt => ../ETRI-SFPOC-CTNMGMT
+
+replace etrisfpocdatamodel => ../ETRI-SFPOC-DATAMODEL
+
 require (
+	etrisfpocdatamodel v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.7.7
 	github.com/gofrs/uuid v4.2.0+incompatible
+	github.com/gorilla/websocket v1.5.0
 )
 
 require (
