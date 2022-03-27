@@ -4,7 +4,7 @@ window.onload = () => {
     return;
   }
   function connect() {
-    let ws = new WebSocket(`ws://${window.location.host}/api/v1/notification`);
+    let ws = new WebSocket(`ws://${window.location.host}/api/v1/subs`);
     ws.onopen = (e) => {
       console.log("onopen", arguments);
     }

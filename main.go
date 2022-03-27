@@ -1,6 +1,7 @@
 package main
 
 import (
+	"etri-sfpoc-edge/config"
 	"etri-sfpoc-edge/notifier"
 	"etri-sfpoc-edge/router"
 	"sync"
@@ -17,24 +18,8 @@ type RequestBox struct {
 var box = &RequestBox{notifier.NewNotiManager()}
 
 func main() {
-	// d := etrisfpocdatamodel.TmpDevice{Name: "Godopu"}
-	// fmt.Println(d)
 
-	router.NewRouter().Run(":8080")
-	// r := gin.Default()
-	// r.Static("/", "./static")
-
-	// r.GET("/ping", func(c *gin.Context) {
-	// 	c.JSON(200, gin.H{
-	// 		"message": "pong",
-	// 	})
-	// })
-
-	// r.GET("/wait", WaitHandler)
-	// r.GET("/waitwithchan", WaitWithChannelHandler)
-
-	// r.Run(":8000") // listen and serve on 0.0.0.0:8080
-
+	router.NewRouter().Run(config.Params["bind"].(string))
 }
 
 func WaitHandler(c *gin.Context) {
