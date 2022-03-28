@@ -6,5 +6,6 @@ const (
 )
 
 const (
-	SubtokenStatusChanged = "SUBTOKENSTATUSCHANGED"
+	SubtokenStatusChanged     = "SUBTOKENSTATUSCHANGED"
+	SubtokenRegisterPermitted = "SubtokenRegisterPermitted"
 )

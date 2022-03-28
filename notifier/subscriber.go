@@ -9,7 +9,6 @@ type ISubscriber interface {
 
 // default implementation of ISubscriber
 type CallbackSubscriber struct {
-	INotiManager
 	_id    string
 	_token string
 	_type  int
@@ -37,7 +36,6 @@ func NewCallbackSubscriber(_id, _token string, _type int, _h func(string)) ISubs
 }
 
 type ChanSubscriber struct {
-	INotiManager
 	_id      string
 	_token   string
 	_type    int

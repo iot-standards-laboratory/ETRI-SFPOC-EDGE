@@ -18,6 +18,9 @@ import (
 type DBHandlerI interface {
 	GetDevices() ([]*Device, int, error)
 	AddDevice(d *Device) error
+	AddDiscoveredDevice(device *Device)
+	GetDiscoveredDevices() []*Device
+	RemoveDiscoveredDevice(device *Device)
 	QueryDevice(dname string) (*Device, error)
 	DeleteDevice(device *Device) error
 	IsExistDevice(dname string) bool

@@ -1,7 +1,6 @@
 package router
 
 import (
-	"etri-sfpoc-edge/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,12 +8,7 @@ import (
 
 func GetCtrlList(c *gin.Context) {
 
-	defer func() {
-		if r := recover(); r != nil {
-			logger.Println(r)
-			c.String(http.StatusBadRequest, r.(string))
-		}
-	}()
+	defer handleError(c)
 
 	w := c.Writer
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -31,14 +25,7 @@ func GetCtrlList(c *gin.Context) {
 }
 
 func PostCtrl(c *gin.Context) {
-	defer func() {
-		if r := recover(); r != nil {
-			logger.Println(r)
-			c.String(http.StatusBadRequest, "There is wrong!!")
-		}
-	}()
-
-	logger.Println("^^")
+	defer handleError(c)
 
 	w := c.Writer
 	w.Header().Set("Access-Control-Allow-Origin", "*")

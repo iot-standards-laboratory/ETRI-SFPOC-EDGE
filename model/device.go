@@ -1,6 +1,8 @@
 package model
 
 import (
+	"sync"
+
 	"gorm.io/gorm"
 )
 
@@ -13,6 +15,30 @@ type Device struct {
 	SID   string `gorm:"column:sid" json:"sid"`             // Service ID
 	SName string `gorm:"column:sname" json:"sname"`         // Service Name
 	// Opts []string
+}
+
+var discoveredDevices = []*Device{}
+var discoveredDeviceMutex sync.Mutex
+
+func (s *_DBHandler) AddDiscoveredDevice(device *Device) {
+	discoveredDeviceMutex.Lock()
+	defer discoveredDeviceMutex.Unlock()
+	discoveredDevices = append(discoveredDevices, device)
+}
+
+func (s *_DBHandler) GetDiscoveredDevices() []*Device {
+	return discoveredDevices
+}
+
+func (s *_DBHandler) RemoveDiscoveredDevice(device *Device) {
+	discoveredDeviceMutex.Lock()
+	defer discoveredDeviceMutex.Unlock()
+	for i, e := range discoveredDevices {
+		if e == device {
+			discoveredDevices[i] = discoveredDevices[len(discoveredDevices)-1]
+			discoveredDevices = discoveredDevices[:len(discoveredDevices)-1]
+		}
+	}
 }
 
 func (s *_DBHandler) GetDevices() ([]*Device, int, error) {
@@ -42,9 +68,9 @@ func (s *_DBHandler) AddDevice(device *Device) error {
 
 }
 
-func (s *_DBHandler) QueryDevice(dname string) (*Device, error) {
+func (s *_DBHandler) QueryDevice(did string) (*Device, error) {
 	var device Device
-	tx := s.db.First(&device, "dname=?", dname)
+	tx := s.db.First(&device, "did=?", did)
 
 	if tx.Error != nil {
 		return nil, tx.Error

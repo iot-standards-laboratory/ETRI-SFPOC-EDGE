@@ -3,12 +3,9 @@ package router
 import (
 	"etri-sfpoc-edge/model"
 	"etri-sfpoc-edge/notifier"
-	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gofrs/uuid"
-	"github.com/gorilla/websocket"
 )
 
 type RequestBox struct {
@@ -34,9 +31,16 @@ func NewRouter() *gin.Engine {
 	apiEngine := gin.New()
 	apiv1 := apiEngine.Group("api/v1")
 	{
-		apiv1.GET("/subs", Subscribe)
+		apiv1.GET("/pub", Subscribe)
+		apiv1.GET("/subs/list", GetSubscriberList)
 		apiv1.POST("/ctrls", PostCtrl)
 		apiv1.GET("/ctrls/list", GetCtrlList)
+		apiv1.GET("/devs/list", GetDeviceList)
+		apiv1.DELETE("/devs", DeleteDevice)
+		apiv1.GET("/devs/discover/list", GetDiscoveredDevices)
+		apiv1.POST("/devs/discover", PostDiscoveredDevice)
+		apiv1.PUT("/devs/discover", PutDiscoveredDevice)
+
 	}
 
 	r := gin.New()
@@ -56,44 +60,3 @@ func NewRouter() *gin.Engine {
 }
 
 // Alarm
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin:     func(r *http.Request) bool { return true },
-}
-
-func Subscribe(c *gin.Context) {
-	_complete := make(chan int)
-	_uuid, _ := uuid.NewV4()
-
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		c.Writer.WriteHeader(http.StatusBadRequest)
-		c.Writer.Write([]byte(err.Error()))
-		return
-	}
-
-	// conn.SetPingHandler((func(ping string) error {
-	// 	_h := conn.PingHandler()
-	// 	fmt.Println("ping : ", ping)
-	// 	return _h(ping)
-	// }))
-
-	// conn.SetPongHandler((func(pong string) error {
-	// 	_h := conn.PongHandler()
-	// 	fmt.Println("pong : ", pong)
-	// 	return _h(pong)
-	// }))
-
-	// conn.SetCloseHandler((func(code int, text string) error {
-	// 	_h := conn.CloseHandler()
-	// 	fmt.Println("Close!!")
-	// 	return _h(code, text)
-	// }))
-
-	subscriber := notifier.NewWebsocketSubscriber(_uuid.String(), notifier.SubtokenStatusChanged, notifier.SubtypeCont, _complete, conn)
-	box.AddSubscriber(subscriber)
-	defer box.RemoveSubscriber(subscriber)
-
-	<-_complete
-}
