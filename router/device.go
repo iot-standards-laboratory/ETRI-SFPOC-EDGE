@@ -41,6 +41,7 @@ func PostDiscoveredDevice(c *gin.Context) {
 
 	device.DID = uuid.NewString()
 	db.AddDiscoveredDevice(device)
+	box.Publish(notifier.NewStatusChangedEvent("discover device", "discover device", notifier.SubtokenStatusChanged))
 
 	resultCh := make(chan notifier.IEvent)
 	subscriber := notifier.NewChanSubscriber(

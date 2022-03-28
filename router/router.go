@@ -40,6 +40,8 @@ func NewRouter() *gin.Engine {
 		apiv1.GET("/devs/discover/list", GetDiscoveredDevices)
 		apiv1.POST("/devs/discover", PostDiscoveredDevice)
 		apiv1.PUT("/devs/discover", PutDiscoveredDevice)
+		apiv1.GET("/svcs/list", GetServiceList)
+		apiv1.GET("/svcs", GetServiceInfo)
 
 	}
 
