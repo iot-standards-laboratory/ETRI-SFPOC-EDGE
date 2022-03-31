@@ -2,19 +2,14 @@ package model
 
 import (
 	"encoding/json"
+	"etrisfpocdatamodel"
 	"fmt"
 	"io"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
-type Controller struct {
-	gorm.Model
-	CID   string `gorm:"uniqueIndex;column:cid" json:"cid"` // Controller ID
-	CName string `gorm:"column:cname" json:"cname"`         // Device ID
-	Key   string `gorm:"column:key" json:"key"`             // Service ID
-}
+type Controller etrisfpocdatamodel.Controller
 
 func (s *_DBHandler) AddController(r io.Reader) (*Controller, error) {
 	decoder := json.NewDecoder(r)

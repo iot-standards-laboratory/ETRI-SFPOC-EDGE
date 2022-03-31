@@ -7,6 +7,8 @@ replace etrisfpocctnmgmt => ../ETRI-SFPOC-CTNMGMT
 replace etrisfpocdatamodel => ../ETRI-SFPOC-DATAMODEL
 
 require (
+	etrisfpocctnmgmt v0.0.0-00010101000000-000000000000
+	etrisfpocdatamodel v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.7.7
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/google/uuid v1.3.0

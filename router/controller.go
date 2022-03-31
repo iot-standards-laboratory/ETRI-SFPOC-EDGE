@@ -1,6 +1,7 @@
 package router
 
 import (
+	"etri-sfpoc-edge/notifier"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,10 +32,10 @@ func PostCtrl(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
-	_, err := db.AddController(c.Request.Body)
+	ctrl, err := db.AddController(c.Request.Body)
 	if err != nil {
 		panic(err.Error())
 	}
-
-	c.Status(http.StatusCreated)
+	box.Publish(notifier.NewStatusChangedEvent("register controller", "register controller", notifier.SubtokenStatusChanged))
+	c.JSON(http.StatusCreated, ctrl)
 }

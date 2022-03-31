@@ -3,9 +3,7 @@ package router
 import (
 	"etri-sfpoc-edge/logger"
 	"etri-sfpoc-edge/notifier"
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gofrs/uuid"
@@ -18,9 +16,20 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-func Subscribe(c *gin.Context) {
+func GetPublish(c *gin.Context) {
 	_complete := make(chan int)
 	_uuid, _ := uuid.NewV4()
+
+	path := c.Param("any")
+
+	var subtoken string
+	if len(path) <= 9 {
+		subtoken = notifier.SubtokenStatusChanged
+	} else if path[8] != '/' {
+		return
+	} else {
+		subtoken = path[9:]
+	}
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -29,16 +38,18 @@ func Subscribe(c *gin.Context) {
 		return
 	}
 
-	subscriber := notifier.NewWebsocketSubscriber(_uuid.String(), notifier.SubtokenStatusChanged, notifier.SubtypeCont, _complete, conn)
+	subscriber := notifier.NewWebsocketSubscriber(
+		_uuid.String(),
+		subtoken,
+		notifier.SubtypeCont,
+		_complete,
+		conn,
+	)
+
 	box.AddSubscriber(subscriber)
 	defer box.RemoveSubscriber(subscriber)
 
 	closeCh := make(chan bool)
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println(r.(error).Error())
-		}
-	}()
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
@@ -53,11 +64,12 @@ func Subscribe(c *gin.Context) {
 				if c.Code == 1000 {
 					// Never entering since c.Code == 1005
 					logger.Println(err)
-					break
+					panic(err)
 				}
 			}
 		}
 	}()
+
 	select {
 	case <-closeCh:
 		box.RemoveSubscriber(subscriber)
@@ -67,14 +79,25 @@ func Subscribe(c *gin.Context) {
 	}
 }
 
+func PutPublish(c *gin.Context) {
+	defer handleError(c)
+
+	subtoken := c.GetHeader("sid")
+	if len(subtoken) == 0 {
+		panic("bad request - request should have sid in header")
+	}
+
+	box.Publish(notifier.NewStatusChangedEvent("test", "Hello world", subtoken))
+}
+
 func GetSubscriberList(c *gin.Context) {
 	defer handleError(c)
 	c.JSON(http.StatusOK, box.GetSubscriberList())
 }
 
-func fire() {
-	for i := 0; i < 10; i++ {
-		box.Publish(notifier.NewStatusChangedEvent("Hello world", "Hello world", notifier.SubtokenStatusChanged))
-		time.Sleep(time.Second * 2)
-	}
-}
+// func fire() {
+// 	for i := 0; i < 10; i++ {
+// 		box.Publish(notifier.NewStatusChangedEvent("Hello world", "Hello world", notifier.SubtokenStatusChanged))
+// 		time.Sleep(time.Second * 2)
+// 	}
+// }

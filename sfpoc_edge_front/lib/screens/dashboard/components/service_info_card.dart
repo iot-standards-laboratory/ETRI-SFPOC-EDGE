@@ -15,10 +15,10 @@ class ServiceInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(defaultPadding),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.all(defaultPadding),
+      decoration: const BoxDecoration(
         color: secondaryColor,
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,11 +41,11 @@ class ServiceInfoCard extends StatelessWidget {
                 ),
                 IconButton(
                   icon: info.id == ''
-                      ? Icon(
+                      ? const Icon(
                           Icons.cancel_outlined,
                           color: Colors.red,
                         )
-                      : Icon(
+                      : const Icon(
                           Icons.check_circle_outline,
                           color: Colors.green,
                         ),
@@ -54,8 +54,8 @@ class ServiceInfoCard extends StatelessWidget {
                     if (info.id == '') {
                       var response = await http.post(
                         Uri.http(
-                          '${serverAddr}',
-                          'services',
+                          serverAddr,
+                          postSvcs,
                         ),
                         headers: <String, String>{
                           'Content-Type': 'application/json; charset=UTF-8',
@@ -81,7 +81,7 @@ class ServiceInfoCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               onPressed: () {
-                launch('http://${serverAddr}/services/${info.id}');
+                launch('http://${serverAddr}/svc/${info.id}');
               },
             ),
             // ProgressLine(

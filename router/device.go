@@ -66,7 +66,7 @@ func PostDiscoveredDevice(c *gin.Context) {
 		db.AddDevice(device)
 		db.AddService(device.SName)
 		db.RemoveDiscoveredDevice(device)
-		c.Status(http.StatusCreated)
+		c.JSON(http.StatusCreated, device)
 		box.Publish(notifier.NewStatusChangedEvent("Added device", "Added device", notifier.SubtokenStatusChanged))
 		//alarm
 
@@ -106,7 +106,12 @@ func GetDeviceList(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
-	devices, _, err := db.GetDevices()
+	sname := c.GetHeader("sname")
+	if len(sname) == 0 {
+		sname = "all"
+	}
+
+	devices, _, err := db.GetDevices(sname)
 	if err != nil {
 		panic(err)
 	}

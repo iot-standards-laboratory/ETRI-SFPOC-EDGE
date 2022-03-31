@@ -16,7 +16,7 @@ import (
 // }
 
 type DBHandlerI interface {
-	GetDevices() ([]*Device, int, error)
+	GetDevices(string) ([]*Device, int, error)
 	AddDevice(d *Device) error
 	AddDiscoveredDevice(device *Device)
 	GetDiscoveredDevices() []*Device

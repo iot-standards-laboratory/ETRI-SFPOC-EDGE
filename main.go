@@ -18,8 +18,8 @@ type RequestBox struct {
 var box = &RequestBox{notifier.NewNotiManager()}
 
 func main() {
-
 	router.NewRouter().Run(config.Params["bind"].(string))
+	// etrisfpocctnmgmt.CreateContainer("hello-world")
 }
 
 func WaitHandler(c *gin.Context) {

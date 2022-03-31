@@ -2,18 +2,13 @@ package model
 
 import (
 	"errors"
+	"etrisfpocdatamodel"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type Service struct {
-	gorm.Model
-	SName     string `gorm:"column:sname" json:"sname"`
-	SID       string `gorm:"column:sid" json:"sid"`
-	NumOfDevs int    `gorm:"column:ndevs" json:"ndevs"`
-	Addr      string `gorm:"column:addr"`
-}
+type Service etrisfpocdatamodel.Service
 
 func (s *_DBHandler) GetServices() ([]*Service, error) {
 	var services []*Service

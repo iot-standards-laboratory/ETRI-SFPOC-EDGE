@@ -26,7 +26,7 @@ func (rs *_WebsocketSubscriber) Token() string {
 }
 
 func (rs *_WebsocketSubscriber) Handle(e IEvent) {
-	payload := map[string]interface{}{"key": e.Title()}
+	payload := map[string]interface{}{"key": e.Title(), "value": e.Body()}
 
 	if rs._conn.WriteJSON(payload) != nil {
 		rs._complete <- 200
