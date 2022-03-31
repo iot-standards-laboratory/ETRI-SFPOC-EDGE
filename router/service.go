@@ -2,14 +2,18 @@ package router
 
 import (
 	"errors"
+	"etri-sfpoc-edge/logger"
 	"etri-sfpoc-edge/notifier"
 	"etrisfpocctnmgmt"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 func GetServiceList(c *gin.Context) {
@@ -128,6 +132,15 @@ func SvcBroker(c *gin.Context) {
 		panic(err)
 	}
 
+	if strings.Contains(path, "/push/v1") {
+		pushHandle(ip, path, c)
+	} else {
+		apiHandle(ip, path, c)
+	}
+
+}
+
+func apiHandle(ip, path string, c *gin.Context) {
 	req, err := http.NewRequest(c.Request.Method, "http://"+ip+path, c.Request.Body)
 	if err != nil {
 		panic(err)
@@ -139,5 +152,69 @@ func SvcBroker(c *gin.Context) {
 		panic(err)
 	}
 
-	io.Copy(w, resp.Body)
+	io.Copy(c.Writer, resp.Body)
+}
+
+func pushHandle(serverAdr, path string, gin *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Println(r)
+		}
+	}()
+	u := url.URL{Scheme: "ws", Host: serverAdr, Path: path}
+	log.Printf("connecting to %s", u.String())
+
+	w, err := upgrader.Upgrade(gin.Writer, gin.Request, nil)
+	if err != nil {
+		gin.Writer.WriteHeader(http.StatusBadRequest)
+		gin.Writer.Write([]byte(err.Error()))
+		return
+	}
+	defer w.Close()
+
+	readDone := make(chan struct{})
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				close(readDone)
+			}
+		}()
+		for {
+			// Read Messages
+			_, _, err := w.ReadMessage()
+			if c, k := err.(*websocket.CloseError); k {
+				if c.Code == 1000 {
+					logger.Println(err)
+					panic(err)
+				}
+			}
+		}
+	}()
+
+	r, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	if err != nil {
+		log.Fatal("dial:", err)
+	}
+	defer r.Close()
+
+	writeDone := make(chan struct{})
+	go func() {
+		defer close(writeDone)
+		var obj map[string]interface{}
+		for {
+			err := r.ReadJSON(&obj)
+			if err != nil {
+				return
+			}
+			w.WriteJSON(obj)
+		}
+	}()
+
+	select {
+	case <-readDone:
+		return
+	case <-writeDone:
+		return
+	}
+
 }
