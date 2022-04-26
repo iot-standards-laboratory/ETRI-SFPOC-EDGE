@@ -3,6 +3,7 @@ package router
 import (
 	"etri-sfpoc-edge/logger"
 	"etri-sfpoc-edge/notifier"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -79,15 +80,24 @@ func GetPublish(c *gin.Context) {
 	}
 }
 
-func PutPublish(c *gin.Context) {
+func PostPublish(c *gin.Context) {
 	defer handleError(c)
 
-	subtoken := c.GetHeader("sid")
+	subtoken := c.GetHeader("subtoken")
 	if len(subtoken) == 0 {
 		panic("bad request - request should have sid in header")
 	}
 
-	box.Publish(notifier.NewStatusChangedEvent("test", "Hello world", subtoken))
+	fmt.Println("subtoken: ", subtoken)
+
+	var body map[string]interface{}
+	err := c.BindJSON(&body)
+	if err != nil {
+		panic(err)
+	}
+
+	box.Publish(notifier.NewStatusChangedEvent("push alarm", body, subtoken))
+	c.String(http.StatusOK, "Sended PUSH")
 }
 
 func GetSubscriberList(c *gin.Context) {

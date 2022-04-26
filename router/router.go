@@ -52,8 +52,8 @@ func NewRouter() *gin.Engine {
 	pushEngine.GET("/*any", func(c *gin.Context) {
 		GetPublish(c)
 	})
-	pushEngine.PUT("/*any", func(c *gin.Context) {
-		Test(c)
+	pushEngine.POST("/*any", func(c *gin.Context) {
+		PostPublish(c)
 	})
 
 	svcEngine := gin.New()
