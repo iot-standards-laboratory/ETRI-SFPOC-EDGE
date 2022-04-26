@@ -1,9 +1,13 @@
 package main
 
 import (
+	"errors"
 	"etri-sfpoc-edge/config"
 	"etri-sfpoc-edge/notifier"
 	"etri-sfpoc-edge/router"
+	"flag"
+	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -18,7 +22,21 @@ type RequestBox struct {
 var box = &RequestBox{notifier.NewNotiManager()}
 
 func main() {
-	router.NewRouter().Run(config.Params["bind"].(string))
+	cfg := flag.Bool("init", false, "create initial config file")
+	flag.Parse()
+	if *cfg {
+
+		config.CreateInitFile()
+	} else {
+		if _, err := os.Stat("./config.properties"); errors.Is(err, os.ErrNotExist) {
+			// path/to/whatever does not exist
+			fmt.Println("config file doesn't exist")
+			fmt.Println("please add -init option to create config file")
+			return
+		}
+		config.LoadConfig()
+		router.NewRouter().Run(config.Params["bind"].(string))
+	}
 	// etrisfpocctnmgmt.CreateContainer("hello-world")
 }
 
