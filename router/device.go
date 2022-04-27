@@ -44,6 +44,7 @@ func PostDiscoveredDevice(c *gin.Context) {
 
 	device.DID = uuid.NewString()
 	db.AddDiscoveredDevice(device)
+	defer db.RemoveDiscoveredDevice(device)
 	box.Publish(notifier.NewStatusChangedEvent("discover device", "discover device", notifier.SubtokenStatusChanged))
 
 	resultCh := make(chan notifier.IEvent)
@@ -79,8 +80,6 @@ func PostDiscoveredDevice(c *gin.Context) {
 	case <-timer.C:
 		cancelHandler(errors.New("timeout"))
 	}
-
-	db.RemoveDiscoveredDevice(device)
 }
 
 func sendPOSTtoService(device *model.Device) {
@@ -168,5 +167,6 @@ func DeleteDevice(c *gin.Context) {
 		panic(err)
 	}
 	db.DeleteDevice(device)
+	box.Publish(notifier.NewStatusChangedEvent("remove device", nil, notifier.SubtokenStatusChanged))
 	c.Status(http.StatusOK)
 }

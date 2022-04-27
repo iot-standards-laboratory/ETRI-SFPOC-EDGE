@@ -83,12 +83,18 @@ func GetPublish(c *gin.Context) {
 func PostPublish(c *gin.Context) {
 	defer handleError(c)
 
-	subtoken := c.GetHeader("subtoken")
-	if len(subtoken) == 0 {
-		panic("bad request - request should have sid in header")
+	path := c.Param("any")
+
+	var subtoken string
+	if len(path) <= 9 {
+		subtoken = notifier.SubtokenStatusChanged
+	} else if path[8] != '/' {
+		return
+	} else {
+		subtoken = path[9:]
 	}
 
-	fmt.Println("subtoken: ", subtoken)
+	fmt.Printf("subtoken:%s\n", subtoken)
 
 	var body map[string]interface{}
 	err := c.BindJSON(&body)
@@ -96,7 +102,7 @@ func PostPublish(c *gin.Context) {
 		panic(err)
 	}
 
-	box.Publish(notifier.NewStatusChangedEvent("push alarm", body, subtoken))
+	box.Publish(notifier.NewPushEvent("control", body, subtoken))
 	c.String(http.StatusOK, "Sended PUSH")
 }
 
