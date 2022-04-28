@@ -25,7 +25,6 @@ func main() {
 	cfg := flag.Bool("init", false, "create initial config file")
 	flag.Parse()
 	if *cfg {
-
 		config.CreateInitFile()
 	} else {
 		if _, err := os.Stat("./config.properties"); errors.Is(err, os.ErrNotExist) {

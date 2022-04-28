@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -79,8 +80,12 @@ func PutService(c *gin.Context) {
 	}
 
 	fmt.Printf("[registered service]sname: %s / url : %s\n", sname, fmt.Sprintf("%s%s", ip.To4(), port))
-	box.Publish(notifier.NewStatusChangedEvent("service is registered", "service is registered", notifier.SubtokenStatusChanged))
+	go func() {
+		time.Sleep(time.Second * 2) // wait for running server
+		box.Publish(notifier.NewStatusChangedEvent("service", sname, notifier.SubtokenStatusChanged))
+	}()
 	c.JSON(http.StatusOK, svc)
+
 }
 
 func PostService(c *gin.Context) {
