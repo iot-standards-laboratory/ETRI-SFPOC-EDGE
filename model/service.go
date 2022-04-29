@@ -56,14 +56,25 @@ func (s *_DBHandler) IsExistService(name string) bool {
 	return tx.Error == nil
 }
 
-func (s *_DBHandler) UpdateService(name, addr string) (*Service, error) {
-	tx := s.db.Model(&Service{}).Where("sname = ?", name).Updates(Service{SName: name, SID: uuid.NewString(), Addr: addr})
+func (s *_DBHandler) RegisterService(sname, addr string) (*Service, error) {
+	tx := s.db.Model(&Service{}).Where("sname = ?", sname).Updates(Service{SName: sname, SID: uuid.NewString(), Addr: addr})
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
 	var service Service
-	tx.First(&service, "sname=?", name)
+	tx.First(&service, "sname=?", sname)
+	return &service, nil
+}
+
+func (s *_DBHandler) UpdateService(sid, addr string) (*Service, error) {
+	tx := s.db.Model(&Service{}).Where("sid = ?", sid).Updates(Service{Addr: addr})
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	var service Service
+	tx.First(&service, "sid=?", sid)
 	return &service, nil
 }
 

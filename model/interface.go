@@ -29,7 +29,8 @@ type DBHandlerI interface {
 	IsExistController(cid string) bool
 	GetServices() ([]*Service, error)
 	AddService(name string) error
-	UpdateService(name, addr string) (*Service, error)
+	RegisterService(sname, addr string) (*Service, error)
+	UpdateService(sid, addr string) (*Service, error)
 	GetAddr(sid string) (string, error)
 	GetSID(name string) (string, error)
 	IsExistService(name string) bool

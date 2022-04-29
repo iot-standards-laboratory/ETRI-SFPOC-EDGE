@@ -1,13 +1,10 @@
 package router
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"etri-sfpoc-edge/logger"
 	"etri-sfpoc-edge/model"
 	"etri-sfpoc-edge/notifier"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -82,28 +79,6 @@ func PostDiscoveredDevice(c *gin.Context) {
 	}
 }
 
-func sendPOSTtoService(device *model.Device) {
-	ip, err := db.GetAddr(device.SName)
-	if err != nil {
-		return
-	}
-
-	b, err := json.Marshal(device)
-	if err != nil {
-		return
-	}
-
-	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/svc/%s/api/v1/devs", ip, device.SID), bytes.NewReader(b))
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = http.DefaultClient.Do(req)
-
-	if err != nil {
-		panic(err)
-	}
-}
 func PutDiscoveredDevice(c *gin.Context) {
 	defer handleError(c)
 

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -52,6 +53,37 @@ func GetServiceInfo(c *gin.Context) {
 	c.String(http.StatusOK, sid)
 }
 
+func handleRegisterSvc(sname string, ip net.IP, port string) (string, error) {
+	svc, err := db.RegisterService(sname, fmt.Sprintf("%s%s", ip.To4(), port))
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Printf("[registered service]sname: %s / url : %s\n", sname, fmt.Sprintf("%s%s", ip.To4(), port))
+
+	return svc.SID, nil
+}
+
+func handleReconnectSvc(sid, sname string, ip net.IP, port string) error {
+	originAddr, err := db.GetAddr(sid)
+	if err != nil {
+		return err
+	}
+
+	newAddr := fmt.Sprintf("%s%s", ip.To4(), port)
+
+	fmt.Println("newAddr:", newAddr)
+	if strings.Compare(originAddr, newAddr) != 0 {
+		_, err := db.UpdateService(sid, newAddr)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+	// db.GetServices()
+}
+
 func PutService(c *gin.Context) {
 	defer handleError(c)
 
@@ -64,27 +96,39 @@ func PutService(c *gin.Context) {
 		panic(errors.New("bad request - you should import sname to header"))
 	}
 
-	port := c.GetHeader("port")
-	if len(sname) == 0 {
-		panic(errors.New("bad request - you should import port to header"))
-	}
-
 	ip, ok := c.RemoteIP()
 	if !ok {
 		panic(errors.New("scanning IP failed"))
 	}
 
-	svc, err := db.UpdateService(sname, fmt.Sprintf("%s%s", ip.To4(), port))
-	if err != nil {
-		panic(err)
+	port := c.GetHeader("port")
+	if len(sname) == 0 {
+		panic(errors.New("bad request - you should import port to header"))
 	}
 
-	fmt.Printf("[registered service]sname: %s / url : %s\n", sname, fmt.Sprintf("%s%s", ip.To4(), port))
+	path := c.Param("any")
+
+	var sid string
+	var err error
+	if len(path) == 0 {
+		sid, err = handleRegisterSvc(sname, ip, port)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		sid = path[1:]
+		err := handleReconnectSvc(sid, sname, ip, port)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	go func() {
 		time.Sleep(time.Second * 2) // wait for running server
 		box.Publish(notifier.NewStatusChangedEvent("service", sname, notifier.SubtokenStatusChanged))
 	}()
-	c.JSON(http.StatusOK, svc)
+
+	c.String(http.StatusOK, sid)
 
 }
 
@@ -121,9 +165,7 @@ func SvcBroker(c *gin.Context) {
 
 	path := c.Param("any")
 
-	var (
-		id string
-	)
+	var id string
 
 	idx := strings.Index(path[lenPrefix:], "/")
 	if idx == -1 {
@@ -150,6 +192,8 @@ func apiHandle(ip, path string, c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
+
+	req.Header = c.Request.Header
 
 	resp, err := http.DefaultClient.Do(req)
 
