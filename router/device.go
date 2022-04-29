@@ -4,7 +4,9 @@ import (
 	"errors"
 	"etri-sfpoc-edge/logger"
 	"etri-sfpoc-edge/model"
+	"etri-sfpoc-edge/model/cache"
 	"etri-sfpoc-edge/notifier"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -22,6 +24,24 @@ func GetDiscoveredDevices(c *gin.Context) {
 	c.JSON(http.StatusOK, db.GetDiscoveredDevices())
 }
 
+func PostDevice(c *gin.Context) {
+	defer handleError(c)
+
+	var device = &model.Device{}
+	err := c.BindJSON(device)
+	fmt.Println("bind:", device)
+	if err != nil {
+		panic(err)
+	}
+
+	err = cache.AddDevs(device)
+	if err != nil {
+		panic(err)
+	}
+
+	box.Publish(notifier.NewStatusChangedEvent("device connected", nil, notifier.SubtokenStatusChanged))
+	c.Status(http.StatusCreated)
+}
 func PostDiscoveredDevice(c *gin.Context) {
 	defer handleError(c)
 
@@ -106,23 +126,39 @@ func GetDeviceList(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
-	sname := c.GetHeader("sname")
-	if len(sname) == 0 {
-		sname = "all"
-	}
+	c.JSON(http.StatusOK, cache.GetDevList())
+}
 
-	devices, _, err := db.GetDevices(sname)
+func DeleteDevice(c *gin.Context) {
+	defer handleError(c)
+
+	fmt.Println("DETETETETETETSDFDSFEWABDSAF")
+	msg := map[string]string{}
+	err := c.BindJSON(&msg)
 	if err != nil {
 		panic(err)
 	}
 
-	c.JSON(http.StatusOK, devices)
+	cid, ok := msg["cid"]
+	if !ok {
+		panic(errors.New("bad request - you should import cid to request"))
+	}
+
+	did, ok := msg["did"]
+	if !ok {
+		panic(errors.New("bad request - you should import did to request"))
+	}
+
+	cache.RemoveDev(&model.Device{
+		DID: did,
+		CID: cid,
+	})
+
+	box.Publish(notifier.NewStatusChangedEvent("remove device", nil, notifier.SubtokenStatusChanged))
+	c.Status(http.StatusOK)
 }
 
-// func PutDevice(c *gin.Context) {
-// 	defer handleError(c)
-// }
-func DeleteDevice(c *gin.Context) {
+func DeleteDeviceFromDB(c *gin.Context) {
 	defer handleError(c)
 
 	msg := map[string]string{}

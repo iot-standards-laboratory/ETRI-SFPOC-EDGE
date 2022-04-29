@@ -3,11 +3,12 @@ package cache
 import (
 	"errors"
 	"etri-sfpoc-edge/model"
+	"fmt"
 	"strings"
 	"sync"
 )
 
-var devs map[string][]*model.Device // devs[cid] = dev list
+var devs = map[string][]*model.Device{} // devs[cid] = dev list
 var devsMutex sync.Mutex
 
 func AddDevs(dev *model.Device) error {
@@ -49,11 +50,17 @@ func RemoveDev(dev *model.Device) {
 		return
 	}
 
+	fmt.Println("list: ", list)
+
 	for i, e := range list {
+		fmt.Println(dev.DID)
+		fmt.Println(e.DID)
+		fmt.Println("compare:", strings.Compare(dev.DID, e.DID))
+		fmt.Println("len(devs): ", len(list))
 		if strings.Compare(dev.DID, e.DID) == 0 {
 			list[i] = list[len(list)-1]
 			if len(list)-1 == 0 {
-				removeDevs(e.CID)
+				delete(devs, e.CID)
 			} else {
 				devs[dev.CID] = list[:len(list)-1]
 			}
