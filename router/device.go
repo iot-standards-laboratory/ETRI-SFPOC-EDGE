@@ -27,14 +27,24 @@ func GetDiscoveredDevices(c *gin.Context) {
 func PostDevice(c *gin.Context) {
 	defer handleError(c)
 
-	var device = &model.Device{}
-	err := c.BindJSON(device)
-	fmt.Println("bind:", device)
+	params := map[string]interface{}{}
+
+	err := c.BindJSON(&params)
 	if err != nil {
 		panic(err)
 	}
 
-	err = cache.AddDevs(device)
+	did, ok := params["did"].(string)
+	if !ok {
+		panic(errors.New("request should have did"))
+	}
+
+	dev, err := db.QueryDevice(did)
+	if err != nil {
+		panic(err)
+	}
+
+	err = cache.AddDevs(dev)
 	if err != nil {
 		panic(err)
 	}
@@ -42,6 +52,7 @@ func PostDevice(c *gin.Context) {
 	box.Publish(notifier.NewStatusChangedEvent("device connected", nil, notifier.SubtokenStatusChanged))
 	c.Status(http.StatusCreated)
 }
+
 func PostDiscoveredDevice(c *gin.Context) {
 	defer handleError(c)
 

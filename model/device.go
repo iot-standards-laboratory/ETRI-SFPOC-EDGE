@@ -49,10 +49,6 @@ func (s *_DBHandler) GetDevices(sname string) ([]*Device, int, error) {
 	return devices, int(result.RowsAffected), nil
 }
 
-// func (s *dbHandler) GetDevice() *Device {
-// 	device := &Device{}
-// }
-
 func (s *_DBHandler) AddDevice(device *Device) error {
 
 	tx := s.db.Create(device)
