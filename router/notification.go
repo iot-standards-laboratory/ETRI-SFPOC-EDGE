@@ -2,6 +2,7 @@ package router
 
 import (
 	"etri-sfpoc-edge/logger"
+	"etri-sfpoc-edge/model/cache"
 	"etri-sfpoc-edge/notifier"
 	"fmt"
 	"net/http"
@@ -31,6 +32,20 @@ func GetPublish(c *gin.Context) {
 	} else {
 		subtoken = path[9:]
 	}
+
+	cid := c.GetHeader("cid")
+	defer func() {
+		if len(cid) != 0 {
+			cache.RemoveCtrl(cid)
+			box.Publish(
+				notifier.NewStatusChangedEvent(
+					"a controller is disconnected",
+					cid,
+					notifier.SubtokenStatusChanged,
+				),
+			)
+		}
+	}()
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {

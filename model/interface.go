@@ -25,6 +25,7 @@ type DBHandlerI interface {
 	DeleteDevice(device *Device) error
 	IsExistDevice(dname string) bool
 	AddController(r io.Reader) (*Controller, error)
+	GetController(cid string) (*Controller, error)
 	GetControllers() ([]*Controller, error)
 	IsExistController(cid string) bool
 	GetServices() ([]*Service, error)

@@ -33,6 +33,17 @@ func (s *_DBHandler) AddController(r io.Reader) (*Controller, error) {
 	return controller, nil
 }
 
+func (s *_DBHandler) GetController(cid string) (*Controller, error) {
+	var ctrl Controller
+	result := s.db.First(&ctrl, "cid=?", cid)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &ctrl, nil
+}
+
 func (s *_DBHandler) GetControllers() ([]*Controller, error) {
 	var list []*Controller
 

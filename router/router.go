@@ -35,7 +35,7 @@ func NewRouter() *gin.Engine {
 	apiv1 := apiEngine.Group("api/v1")
 	{
 		apiv1.GET("/subs/list", GetSubscriberList)
-		apiv1.POST("/ctrls", PostCtrl)
+		apiv1.POST("/ctrls/*any", PostCtrl)
 		apiv1.GET("/ctrls/list", GetCtrlList)
 		apiv1.GET("/devs/list", GetDeviceList)
 		apiv1.DELETE("/devs", DeleteDevice)
