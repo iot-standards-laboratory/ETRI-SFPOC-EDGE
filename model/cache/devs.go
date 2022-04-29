@@ -53,10 +53,6 @@ func RemoveDev(dev *model.Device) {
 	fmt.Println("list: ", list)
 
 	for i, e := range list {
-		fmt.Println(dev.DID)
-		fmt.Println(e.DID)
-		fmt.Println("compare:", strings.Compare(dev.DID, e.DID))
-		fmt.Println("len(devs): ", len(list))
 		if strings.Compare(dev.DID, e.DID) == 0 {
 			list[i] = list[len(list)-1]
 			if len(list)-1 == 0 {
