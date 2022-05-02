@@ -6,7 +6,6 @@ import (
 	"etri-sfpoc-edge/model"
 	"etri-sfpoc-edge/model/cache"
 	"etri-sfpoc-edge/notifier"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -143,7 +142,6 @@ func GetDeviceList(c *gin.Context) {
 func DeleteDevice(c *gin.Context) {
 	defer handleError(c)
 
-	fmt.Println("DETETETETETETSDFDSFEWABDSAF")
 	msg := map[string]string{}
 	err := c.BindJSON(&msg)
 	if err != nil {

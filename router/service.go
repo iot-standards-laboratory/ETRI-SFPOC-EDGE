@@ -1,12 +1,14 @@
 package router
 
 import (
+	"bytes"
 	"errors"
 	"etri-sfpoc-edge/logger"
 	"etri-sfpoc-edge/notifier"
 	"etrisfpocctnmgmt"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -188,7 +190,19 @@ func SvcBroker(c *gin.Context) {
 }
 
 func apiHandle(ip, path string, c *gin.Context) {
-	req, err := http.NewRequest(c.Request.Method, "http://"+ip+path, c.Request.Body)
+	// fmt.Println("path: ", "http://"+ip+path)
+	// fmt.Println(c.Request.Method)
+	b, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b))
+
+	req, err := http.NewRequest(
+		c.Request.Method,
+		"http://"+ip+path,
+		bytes.NewReader(b),
+	)
 	if err != nil {
 		panic(err)
 	}

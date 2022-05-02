@@ -32,6 +32,7 @@ func PostCtrl(c *gin.Context) {
 		if err != nil {
 			panic(err.Error())
 		}
+		cache.AddCtrls(ctrl)
 		box.Publish(notifier.NewStatusChangedEvent("register controller", "register controller", notifier.SubtokenStatusChanged))
 		c.JSON(http.StatusCreated, ctrl)
 	} else {
@@ -42,6 +43,6 @@ func PostCtrl(c *gin.Context) {
 		}
 		cache.AddCtrls(ctrl)
 		box.Publish(notifier.NewStatusChangedEvent("register controller", "register controller", notifier.SubtokenStatusChanged))
-		c.JSON(http.StatusCreated, ctrl)
+		c.JSON(http.StatusOK, ctrl)
 	}
 }
