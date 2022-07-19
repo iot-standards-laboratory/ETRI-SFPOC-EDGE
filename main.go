@@ -3,20 +3,17 @@ package main
 import (
 	"errors"
 	"etri-sfpoc-edge/config"
-	"etri-sfpoc-edge/notifier"
-	"etri-sfpoc-edge/router"
+	"etri-sfpoc-edge/v1/router"
 	"flag"
 	"fmt"
 	"os"
 )
 
-type RequestBox struct {
-	notifier.INotiManager
-}
-
 func main() {
 	cfg := flag.Bool("init", false, "create initial config file")
+	version := flag.String("v", "v2", "specify version")
 	flag.Parse()
+
 	if *cfg {
 		config.CreateInitFile()
 	} else {

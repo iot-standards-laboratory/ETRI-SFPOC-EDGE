@@ -1,8 +1,8 @@
 package router
 
 import (
-	"etri-sfpoc-edge/model/cache"
-	"etri-sfpoc-edge/notifier"
+	"etri-sfpoc-edge/v1/model/cache"
+	"etri-sfpoc-edge/v1/notifier"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"etri-sfpoc-edge/notifier"
+	"etri-sfpoc-edge/v1/notifier"
 	"sync"
 	"time"
 

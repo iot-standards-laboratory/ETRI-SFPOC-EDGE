@@ -3,9 +3,9 @@ package router
 import (
 	"errors"
 	"etri-sfpoc-edge/logger"
-	"etri-sfpoc-edge/model"
-	"etri-sfpoc-edge/model/cache"
-	"etri-sfpoc-edge/notifier"
+	"etri-sfpoc-edge/v1/model"
+	"etri-sfpoc-edge/v1/model/cache"
+	"etri-sfpoc-edge/v1/notifier"
 	"net/http"
 	"time"
 

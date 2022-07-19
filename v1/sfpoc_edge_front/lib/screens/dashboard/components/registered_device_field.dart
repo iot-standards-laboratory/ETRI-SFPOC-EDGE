@@ -207,7 +207,8 @@ DataRow _deviceRow(Device d, BuildContext ctx) {
       DataCell(Text(d.name!)),
       DataCell(Text(d.cid!), onTap: () {
         Clipboard.setData(ClipboardData(text: '${d.sid}/${d.id}'));
-        ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          const SnackBar(
             backgroundColor: Colors.black,
             content: SizedBox(
               height: 40,
@@ -220,7 +221,9 @@ DataRow _deviceRow(Device d, BuildContext ctx) {
                   ),
                 ),
               ),
-            )));
+            ),
+          ),
+        );
       }),
       DataCell(Text(d.sname!), onTap: () => cellTabListener(ctx, d)),
     ],

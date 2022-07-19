@@ -2,7 +2,7 @@ package cache
 
 import (
 	"errors"
-	"etri-sfpoc-edge/model"
+	"etri-sfpoc-edge/v1/model"
 	"strings"
 	"sync"
 )

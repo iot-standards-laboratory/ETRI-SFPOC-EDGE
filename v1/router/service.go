@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"etri-sfpoc-edge/logger"
-	"etri-sfpoc-edge/notifier"
+	"etri-sfpoc-edge/v1/notifier"
 	"etrisfpocctnmgmt"
 	"fmt"
 	"io"
