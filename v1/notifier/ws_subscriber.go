@@ -39,5 +39,4 @@ func (rs *_WebsocketSubscriber) Type() int {
 
 func NewWebsocketSubscriber(_id, _token string, _type int, _complete chan<- int, _conn *websocket.Conn) ISubscriber {
 	return &_WebsocketSubscriber{_id: _id, _token: _token, _type: _type, _complete: _complete, _conn: _conn, Msg: _id}
-
 }

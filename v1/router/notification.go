@@ -34,6 +34,7 @@ func GetPublish(c *gin.Context) {
 	}
 
 	cid := c.GetHeader("cid")
+	
 	defer func() {
 		if len(cid) != 0 {
 			cache.RemoveCtrl(cid)

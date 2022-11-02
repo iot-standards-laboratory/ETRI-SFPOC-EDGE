@@ -32,6 +32,7 @@ func main() {
 			v2router.NewRouter().Run(config.Params["bind"].(string))
 		}
 	}
+
 	// etrisfpocctnmgmt.CreateContainer("hello-world")
 }
 
