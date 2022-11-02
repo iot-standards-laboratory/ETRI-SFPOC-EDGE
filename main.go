@@ -3,10 +3,12 @@ package main
 import (
 	"errors"
 	"etri-sfpoc-edge/config"
-	"etri-sfpoc-edge/v1/router"
+	v1router "etri-sfpoc-edge/v1/router"
+	v2router "etri-sfpoc-edge/v2/router"
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -24,7 +26,11 @@ func main() {
 			return
 		}
 		config.LoadConfig()
-		router.NewRouter().Run(config.Params["bind"].(string))
+		if strings.Compare(*version, "v1") == 0 {
+			v1router.NewRouter().Run(config.Params["bind"].(string))
+		} else {
+			v2router.NewRouter().Run(config.Params["bind"].(string))
+		}
 	}
 	// etrisfpocctnmgmt.CreateContainer("hello-world")
 }
