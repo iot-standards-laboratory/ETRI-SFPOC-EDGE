@@ -18,3 +18,16 @@ services:
     volumes:
       - ./config:/consul/config:z
     #   - consul-data:/consul/data:z
+  centrifugo:
+    container_name: centrifugo
+    hostname: centrifugo
+    image: centrifugo/centrifugo:latest
+    ports:
+      - 8000:8000/tcp
+    volumes:
+      - ./config/centrifugo_config.json:/centrifugo/config.json
+    command: centrifugo -c config.json
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
