@@ -16,7 +16,7 @@ services:
       - no-new-privileges:true
     user: root:root
     volumes:
-      - ./config:/consul/config:z
+      - ./config/consul/:/consul/config:z
     #   - consul-data:/consul/data:z
   centrifugo:
     container_name: centrifugo
@@ -25,9 +25,23 @@ services:
     ports:
       - 8000:8000/tcp
     volumes:
-      - ./config/centrifugo_config.json:/centrifugo/config.json
+      - ./config/centrifuge/config.json:/centrifugo/config.json
     command: centrifugo -c config.json
     ulimits:
       nofile:
         soft: 65535
         hard: 65535
+  postgres:
+    image: postgres:latest
+    hostname: outline-db
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    restart: unless-stopped
+    volumes:
+      # - ./.data/db/data-14:/var/lib/postgresql/data
+      # - ./.data/db/dump:/home
+      - /etc/localtime:/etc/localtime:ro

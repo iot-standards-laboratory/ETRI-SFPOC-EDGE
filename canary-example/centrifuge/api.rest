@@ -1,0 +1,15 @@
+@serverAddr = dsad
+@channel = public:blank
+POST http://{{serverAddr}}:8000/api
+Authorization: apikey aaaf202f-b5f8-4b34-bf88-f6c03a1ecda6
+Content-Type: application/json
+
+{
+    "method": "publish", 
+    "params": {
+        "channel": "{{channel}}", 
+        "data": {
+            "value": "Hello world"
+        }
+    }
+}

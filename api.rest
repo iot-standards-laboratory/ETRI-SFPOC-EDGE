@@ -1,7 +1,13 @@
-POST http://localhost:8080/login
+GET http://localhost:9988/login
 Content-Type: "application/json"
 
-{
-    "email":"email@email.com",
-    "password":"password"
-}
+Joong-Hwa
+
+GET http://localhost:9988/chat
+Content-Type: "application/json"
+Cookie: session_name=MTY2NzU0ODQ5NXxEdi1CQkFFQ180SUFBUkFCRUFBQUpfLUNBQUVHYzNSeWFXNW5EQVlBQkhWelpYSUdjM1J5YVc1bkRBc0FDVXB2YjI1bkxVaDNZUT09fIoY-uz5317pVKa03tMgEyVUB_dE_NGqo1fPfZpuRbZe
+
+Joong-Hwa
+
+GET http://localhost:9988/
+Content-Type: "application/json"

@@ -38,6 +38,19 @@ func TestControllerRegistration(t *testing.T) {
 	consulapi.DeregisterCtrl(cid)
 }
 
+func TestStatusCheck(t *testing.T) {
+	assert := assert.New(t)
+
+	err := consulapi.Connect("http://localhost:9999")
+	assert.NoError(err)
+
+	state, err := consulapi.GetStatus("ctrl/blank")
+	assert.NoError(err)
+	assert.Equal("passing", state)
+	time.Sleep(time.Second)
+
+}
+
 func TestStore(t *testing.T) {
 	assert := assert.New(t)
 

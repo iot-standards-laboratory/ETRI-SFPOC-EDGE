@@ -21,7 +21,7 @@ func (s *_DBHandler) AddController(r io.Reader) (*Controller, error) {
 	}
 
 	controller.CID = uuid.NewString()
-	controller.Key = controller.CID
+	// controller.Key = controller.CID
 
 	tx := s.db.Create(controller)
 	if tx.Error != nil {

@@ -13,11 +13,13 @@ func NewRouter() *gin.Engine {
 	apiEngine := gin.New()
 	apiv2 := apiEngine.Group("api/v2")
 	{
-		_ = apiv2
+		// _ = apiv2
+		apiv2.POST("/ctrls/*any", PostCtrl)
 	}
 
 	assetEngine := gin.New()
 	assetEngine.Static("/", "./sfpoc_edge_front/build/web")
+
 	r := gin.New()
 	r.Any("/*any", func(c *gin.Context) {
 		remote, err := getRemoteURL(c.Request.Host)

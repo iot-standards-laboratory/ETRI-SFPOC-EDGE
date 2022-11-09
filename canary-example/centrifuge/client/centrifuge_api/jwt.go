@@ -1,8 +1,6 @@
 package centrifuge_api
 
 import (
-	"time"
-
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -26,13 +24,13 @@ func IssueJWT(id, name, role, base string, channels []string) (string, error) {
 		Base:     base,
 		Sub:      id,
 		Channels: channels, // client side subscription시 nil 전달
-		RegisteredClaims: jwt.RegisteredClaims{
-			// A usual scenario is to set the expiration time relative to the current time
-			// ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 20)),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			NotBefore: jwt.NewNumericDate(time.Now()),
-		},
+		// RegisteredClaims: jwt.RegisteredClaims{
+		// 	// A usual scenario is to set the expiration time relative to the current time
+		// 	// ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 20)),
+		// 	ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
+		// 	IssuedAt:  jwt.NewNumericDate(time.Now()),
+		// 	NotBefore: jwt.NewNumericDate(time.Now()),
+		// },
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString([]byte(TokenHmacSecret))
