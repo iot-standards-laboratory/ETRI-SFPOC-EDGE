@@ -1,5 +1,5 @@
 @serverAddr = dsad
-@channel = public:blank
+@channel = public:5eb33219-1b62-4f6b-9fae-b36600e80bf6
 POST http://{{serverAddr}}:8000/api
 Authorization: apikey aaaf202f-b5f8-4b34-bf88-f6c03a1ecda6
 Content-Type: application/json

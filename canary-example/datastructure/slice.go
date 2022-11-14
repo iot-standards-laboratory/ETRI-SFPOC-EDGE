@@ -14,5 +14,8 @@ func RemoveItemFromList(list []int, item int) []int {
 func main() {
 	list := []int{1, 2, 3, 4, 5}
 	list = RemoveItemFromList(list, 1)
+
 	fmt.Println(list)
+	fmt.Println(cap(list))
+	fmt.Println(len(list))
 }
