@@ -22,6 +22,7 @@ services:
     container_name: centrifugo
     hostname: centrifugo
     image: centrifugo/centrifugo:latest
+    restart: always
     ports:
       - 8000:8000/tcp
     volumes:
@@ -33,7 +34,7 @@ services:
         hard: 65535
   postgres:
     image: postgres:latest
-    hostname: outline-db
+    hostname: postgres
     ports:
       - 5432:5432
     environment:

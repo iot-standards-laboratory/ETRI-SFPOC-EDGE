@@ -22,7 +22,7 @@ func init() {
 	box = &RequestBox{notifier.NewNotiManager()}
 
 	var err error
-	db, err = model.NewSqliteHandler("dump.db")
+	db, err = model.NewPostgresqlHandler("dump.db")
 	if err != nil {
 		panic(err)
 	}
