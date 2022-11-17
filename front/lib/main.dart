@@ -22,6 +22,7 @@ class MyApp extends StatelessWidget {
             .apply(bodyColor: Colors.white),
         canvasColor: secondaryColor,
       ),
+      debugShowCheckedModeBanner: false,
       getPages: AppPages.routes,
       initialRoute: AppPages.INITIAL,
     );
