@@ -13,10 +13,12 @@ class HomeView extends GetView<HomeController> {
         title: const Text('HomeView'),
         centerTitle: true,
       ),
-      body: Center(
-        child: Text(
-          'HomeView is working',
-          style: TextStyle(fontSize: 20),
+      body: const SafeArea(
+        child: SingleChildScrollView(
+          child: Text(
+            'HomeView is working',
+            style: TextStyle(fontSize: 20),
+          ),
         ),
       ),
     );
