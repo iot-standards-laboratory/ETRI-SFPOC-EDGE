@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +20,6 @@ func PostCtrl(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
-	fmt.Println(c.Param("any"))
 	if len(c.Param("any")) <= 1 {
 		ctrl, err := db.AddControllerWithJsonReader(c.Request.Body)
 		if err != nil {

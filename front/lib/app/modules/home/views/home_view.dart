@@ -57,16 +57,17 @@ class HomeView extends GetView<HomeController> {
                 Row(
                   children: [
                     Expanded(
-                        child: Column(
-                      children: const [
-                        ServicesField(),
-                        SizedBox(height: defaultPadding),
-                        AgentField(),
-                        SizedBox(height: defaultPadding),
-                        ControllerField(),
-                        SizedBox(height: defaultPadding),
-                      ],
-                    ))
+                      child: Column(
+                        children: const [
+                          ServicesField(),
+                          SizedBox(height: defaultPadding),
+                          AgentField(),
+                          SizedBox(height: defaultPadding),
+                          ControllerField(),
+                          SizedBox(height: defaultPadding),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ],
