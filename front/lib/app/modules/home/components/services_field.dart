@@ -24,29 +24,32 @@ class ServicesField extends GetView<HomeController> {
               ),
         ),
         const SizedBox(height: defaultPadding),
-        ScrollConfiguration(
-          behavior: const MaterialScrollBehavior().copyWith(
-            dragDevices: {
-              PointerDeviceKind.mouse,
-              PointerDeviceKind.touch,
-              PointerDeviceKind.stylus,
-            },
-          ),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Obx(() {
-              return Row(
-                children: controller.services
-                    .map(
-                      (e) => Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: ServiceFieldComponent(info: e),
-                      ),
-                    )
-                    .toList(),
-              );
-            }),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: ScrollConfiguration(
+            behavior: const MaterialScrollBehavior().copyWith(
+              dragDevices: {
+                PointerDeviceKind.mouse,
+                PointerDeviceKind.touch,
+                PointerDeviceKind.stylus,
+              },
+            ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Obx(() {
+                return Row(
+                  children: controller.services
+                      .map(
+                        (e) => Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: ServiceFieldComponent(info: e),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+            ),
           ),
         )
       ],
@@ -67,25 +70,29 @@ class ServicesField extends GetView<HomeController> {
         const SizedBox(
           height: defaultPadding * 1,
         ),
-        SizedBox(
-          height: 200,
-          child: ScrollConfiguration(
-            behavior: const MaterialScrollBehavior().copyWith(dragDevices: {
-              PointerDeviceKind.mouse,
-              PointerDeviceKind.touch,
-              PointerDeviceKind.stylus
-            }),
-            child: PageView.builder(
-              itemCount: controller.services.length,
-              controller: pageController,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+          child: SizedBox(
+            height: 200,
+            child: ScrollConfiguration(
+              behavior: const MaterialScrollBehavior().copyWith(dragDevices: {
+                PointerDeviceKind.mouse,
+                PointerDeviceKind.touch,
+                PointerDeviceKind.stylus
+              }),
+              child: PageView.builder(
+                itemCount: controller.services.length,
+                controller: pageController,
 
-              // itemCount: pages.length,
-              itemBuilder: (_, idx) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: ServiceFieldComponent(info: controller.services[idx]),
-                );
-              },
+                // itemCount: pages.length,
+                itemBuilder: (_, idx) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child:
+                        ServiceFieldComponent(info: controller.services[idx]),
+                  );
+                },
+              ),
             ),
           ),
         ),
