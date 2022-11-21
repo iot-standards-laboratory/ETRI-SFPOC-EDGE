@@ -80,19 +80,21 @@ class ServicesField extends GetView<HomeController> {
                 PointerDeviceKind.touch,
                 PointerDeviceKind.stylus
               }),
-              child: PageView.builder(
-                itemCount: controller.services.length,
-                controller: pageController,
+              child: Obx(() {
+                return PageView.builder(
+                  itemCount: controller.services.length,
+                  controller: pageController,
 
-                // itemCount: pages.length,
-                itemBuilder: (_, idx) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child:
-                        ServiceFieldComponent(info: controller.services[idx]),
-                  );
-                },
-              ),
+                  // itemCount: pages.length,
+                  itemBuilder: (_, idx) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child:
+                          ServiceFieldComponent(info: controller.services[idx]),
+                    );
+                  },
+                );
+              }),
             ),
           ),
         ),

@@ -9,7 +9,7 @@ class Agent {
     return Agent(
       name: json['name'],
       id: json['id'],
-      status: json['status'],
+      status: json['status'] == 'passing' ? "connected" : 'disconnedted',
     );
   }
 }

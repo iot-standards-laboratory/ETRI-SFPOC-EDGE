@@ -6,8 +6,8 @@ class Service {
 
   factory Service.fromJson(dynamic json) {
     return Service(
-      name: json['sname'],
-      id: json['sid'],
+      name: json['name'],
+      id: json['id'],
       numOfCtrls: json['num_clnts'],
     );
   }

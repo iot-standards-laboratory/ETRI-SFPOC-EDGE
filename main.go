@@ -6,6 +6,7 @@ import (
 	"etri-sfpoc-edge/config"
 	"etri-sfpoc-edge/mqtthandler"
 	"etri-sfpoc-edge/v2/consulapi"
+	"etri-sfpoc-edge/v2/model/dbstorage"
 	v2router "etri-sfpoc-edge/v2/router"
 	"flag"
 	"fmt"
@@ -40,6 +41,23 @@ func main() {
 			if strings.Contains(what, "Synced check") {
 				fmt.Println("What:", what)
 				mqtthandler.Publish("public/statuschanged", []byte("changed"))
+
+				agents, err := dbstorage.DefaultDB.GetAgents()
+				if err != nil {
+					return
+				}
+				for _, agent := range agents {
+					status, err := consulapi.GetStatus(fmt.Sprintf("agent/%s", agent.ID))
+					if err != nil {
+						return
+					}
+
+					if strings.Compare(status, "passing") != 0 {
+						err := removeCtrlsWithAgentId(agent.ID)
+						fmt.Println(err)
+					}
+				}
+
 			}
 		}, context.Background())
 
@@ -47,6 +65,38 @@ func main() {
 	}
 
 	// etrisfpocctnmgmt.CreateContainer("hello-world")
+}
+
+func removeCtrlsWithAgentId(agentId string) error {
+	// remove ctrls/{agentid}/ controller
+	fmt.Printf("remove agentCtrls/%s\n", agentId)
+	ctrlKeys, err := consulapi.GetKeys(fmt.Sprintf("agentCtrls/%s", agentId))
+	if err != nil {
+		return err
+	}
+
+	for _, key := range ctrlKeys {
+		err = consulapi.Delete(key)
+		if err != nil {
+			return err
+		}
+	}
+
+	ctrlKeys, err = consulapi.GetKeys("svcCtrls")
+	if err != nil {
+		return err
+	}
+
+	for _, key := range ctrlKeys {
+		if strings.Contains(key, agentId) {
+			err = consulapi.Delete(key)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 // var box = &RequestBox{notifier.NewNotiManager()}

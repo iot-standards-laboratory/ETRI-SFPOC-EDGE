@@ -3,6 +3,7 @@ package router
 import (
 	"encoding/json"
 	"etri-sfpoc-edge/v2/consulapi"
+	"etri-sfpoc-edge/v2/model/dbstorage"
 	"fmt"
 	"net/http"
 
@@ -28,7 +29,7 @@ func PostAgent(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
 	if len(c.Param("any")) <= 1 {
-		agent, err := db.AddAgentWithJsonReader(c.Request.Body)
+		agent, err := dbstorage.DefaultDB.AddAgentWithJsonReader(c.Request.Body)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -36,7 +37,7 @@ func PostAgent(c *gin.Context) {
 		c.JSON(http.StatusCreated, agent)
 	} else {
 		id := c.Param("any")[1:]
-		_, err := db.GetAgent(id)
+		_, err := dbstorage.DefaultDB.GetAgent(id)
 		if err != nil {
 			panic(err)
 		}
@@ -51,7 +52,7 @@ func GetAgent(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
-	agents, err := db.GetAgents()
+	agents, err := dbstorage.DefaultDB.GetAgents()
 	if err != nil {
 		panic(err)
 	}
@@ -64,26 +65,25 @@ func GetAgent(c *gin.Context) {
 			panic(err)
 		}
 
-		ctrls, err := getCtrlsWithAgentId(agent.ID)
-		if err != nil {
-			panic(err)
-		}
+		// ctrls, err := getCtrlsWithAgentId(agent.ID)
+		// if err != nil {
+		// 	panic(err)
+		// }
 
 		agentsWithStatus = append(agentsWithStatus, map[string]interface{}{
 			"name":   agent.Name,
 			"id":     agent.ID,
 			"status": status,
-			"ctrls":  ctrls,
+			// "ctrls":  ctrls,
 		})
 
 		fmt.Println(status)
 	}
-	consulapi.GetStatus("")
 	c.JSON(http.StatusOK, agentsWithStatus)
 }
 
 func getCtrlsWithAgentId(agentId string) ([]map[string]interface{}, error) {
-	keys, err := consulapi.GetKeys(fmt.Sprintf("ctrls/%s", agentId))
+	keys, err := consulapi.GetKeys(fmt.Sprintf("agentCtrls/%s", agentId))
 	if err != nil {
 		return nil, err
 	}

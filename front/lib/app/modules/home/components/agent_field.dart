@@ -184,7 +184,12 @@ DataRow _agentRow(Agent agent) {
     cells: [
       DataCell(Text(agent.name)),
       DataCell(Text(agent.id)),
-      DataCell(Text(agent.status)),
+      DataCell(Text(
+        agent.status,
+        style: TextStyle(
+          color: agent.status == 'connected' ? Colors.green : Colors.red,
+        ),
+      )),
     ],
   );
 }

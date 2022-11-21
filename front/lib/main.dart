@@ -1,10 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:front/app/routes/app_pages.dart';
 import 'package:front/colors.dart';
+import 'package:front/constants.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
+  // serverAddr = kIsWeb ? '${Uri.base.host}:${Uri.base.port}' : 'localhost:3000';
+  serverAddr = 'localhost:3000';
   runApp(const MyApp());
 }
 

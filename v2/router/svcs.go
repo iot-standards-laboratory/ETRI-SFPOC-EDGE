@@ -38,7 +38,7 @@ func GetSvcs(c *gin.Context) {
 		if !ok {
 			panic(errors.New("invalid service name error"))
 		}
-		ctrlKeys, err := consulapi.GetKeys(fmt.Sprintf("ctrls/%s", svcName))
+		ctrlKeys, err := consulapi.GetKeys(fmt.Sprintf("svcCtrls/%s", svcName))
 		if err != nil {
 			panic(err)
 		}

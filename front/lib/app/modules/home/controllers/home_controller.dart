@@ -9,26 +9,15 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
+import 'http_loader.dart';
+
 class HomeController extends GetxController {
   //TODO: Implement HomeController
   var menuIdx = 0.obs;
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  var services = <Service>[
-    Service(id: '1-1-1', name: 'devicemanagera', numOfCtrls: 7),
-    Service(id: '2-2-2', name: 'devicemanagerb', numOfCtrls: 7),
-  ].obs;
-  var agents = <Agent>[
-    Agent(
-        id: '22222-222222-22222-22222222222',
-        name: 'devicemanagera',
-        status: "connected"),
-  ].obs;
-  var ctrls = <Controller>[
-    Controller(
-        id: '1-1-1',
-        name: 'etri-Zdtwe2^==',
-        agentId: '22222-222222-22222-22222222222'),
-  ].obs;
+  var services = <Service>[].obs;
+  var agents = <Agent>[].obs;
+  var ctrls = <Controller>[].obs;
   @override
   void onInit() {
     super.onInit();
@@ -50,7 +39,6 @@ class HomeController extends GetxController {
         .withWillMessage('I am user')
         .startClean() // Non persistent session for testing
         .withWillQos(MqttQos.atLeastOnce);
-    print('Mosquitto client connecting....');
     mqttClient!.connectionMessage = connMess;
 
     try {
@@ -65,20 +53,27 @@ class HomeController extends GetxController {
       client: mqttClient!,
       topic: "public/statuschanged",
       onUpdate: (topic, payload) {
-        print("topic is $topic");
-        print("payload is $payload");
+        loadData();
       },
     );
+  }
+
+  void loadData() async {
+    agents.value = await loadAgents();
+    services.value = await loadServices();
+    ctrls.value = await loadCtrls();
   }
 
   @override
   void onReady() {
     super.onReady();
+    loadData();
     mqttInit();
   }
 
   @override
   void onClose() {
     super.onClose();
+    mqttClient!.disconnect();
   }
 }

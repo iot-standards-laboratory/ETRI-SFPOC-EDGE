@@ -65,7 +65,7 @@ class ControllerField extends GetView<HomeController> {
                       ),
                     ),
                   ],
-                  rows: List<DataRow>.generate(controller.agents.length,
+                  rows: List<DataRow>.generate(controller.ctrls.length,
                       (idx) => _controllerRow(controller.ctrls[idx])),
                 );
               },
@@ -107,7 +107,7 @@ class ControllerField extends GetView<HomeController> {
                       .map(
                         (e) => Padding(
                           padding: const EdgeInsets.only(right: 10),
-                          child: _agentComponent(context, e),
+                          child: _controllerComponent(context, e),
                         ),
                       )
                       .toList(),
@@ -140,7 +140,7 @@ class ControllerField extends GetView<HomeController> {
 //   }
 // }
 
-Widget _agentComponent(BuildContext context, Controller ctrl) {
+Widget _controllerComponent(BuildContext context, Controller ctrl) {
   return Container(
     width: 360,
     height: 180,

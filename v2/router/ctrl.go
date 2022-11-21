@@ -3,6 +3,7 @@ package router
 import (
 	"encoding/json"
 	"errors"
+	"etri-sfpoc-edge/mqtthandler"
 	"etri-sfpoc-edge/v2/consulapi"
 	"fmt"
 	"net/http"
@@ -10,6 +11,37 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func GetCtrl(c *gin.Context) {
+	defer handleError(c)
+
+	w := c.Writer
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+
+	ctrlKeys, err := consulapi.GetKeys("svcCtrls")
+	if err != nil {
+		panic(err)
+	}
+
+	l_ctrls := make([]map[string]interface{}, 0, len(ctrlKeys))
+
+	for _, key := range ctrlKeys {
+		b, err := consulapi.Get(key)
+		if err != nil {
+			panic(err)
+		}
+
+		m_ctrl := map[string]interface{}{}
+		err = json.Unmarshal(b, &m_ctrl)
+		if err != nil {
+			panic(err)
+		}
+
+		l_ctrls = append(l_ctrls, m_ctrl)
+	}
+
+	c.JSON(http.StatusOK, l_ctrls)
+}
 func PostCtrl(c *gin.Context) {
 	defer handleError(c)
 
@@ -40,7 +72,7 @@ func PostCtrl(c *gin.Context) {
 
 	json_payload, _ := json.Marshal(payload)
 	err = consulapi.Put(
-		fmt.Sprintf("ctrls/%s/%s", agentId, ctrlId),
+		fmt.Sprintf("agentCtrls/%s/%s", agentId, ctrlId),
 		json_payload,
 	)
 	if err != nil {
@@ -48,7 +80,7 @@ func PostCtrl(c *gin.Context) {
 	}
 
 	err = consulapi.Put(
-		fmt.Sprintf("ctrls/%s/%s/%s", svcName, agentId, ctrlId),
+		fmt.Sprintf("svcCtrls/%s/%s/%s", svcName, agentId, ctrlId),
 		json_payload,
 	)
 	if err != nil {
@@ -75,6 +107,7 @@ func PostCtrl(c *gin.Context) {
 		}
 	}
 
+	mqtthandler.Publish("public/statuschanged", []byte("changed"))
 	c.String(http.StatusOK, "OK")
 }
 
@@ -106,15 +139,15 @@ func DeleteCtrl(c *gin.Context) {
 		panic(errors.New("invalid controller id error"))
 	}
 
-	err = consulapi.Delete(fmt.Sprintf("ctrls/%s/%s", agentId, ctrlId))
+	err = consulapi.Delete(fmt.Sprintf("agentCtrls/%s/%s", agentId, ctrlId))
 	if err != nil {
 		panic(err)
 	}
 
-	err = consulapi.Delete(fmt.Sprintf("ctrls/%s/%s/%s", svcName, agentId, ctrlId))
+	err = consulapi.Delete(fmt.Sprintf("svcCtrls/%s/%s/%s", svcName, agentId, ctrlId))
 	if err != nil {
 		panic(err)
 	}
-
+	mqtthandler.Publish("public/statuschanged", []byte("changed"))
 	c.String(http.StatusOK, "OK")
 }
