@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"etri-sfpoc-edge/config"
+	"etri-sfpoc-edge/mqtthandler"
 	v1router "etri-sfpoc-edge/v1/router"
+	"etri-sfpoc-edge/v2/consulapi"
 	v2router "etri-sfpoc-edge/v2/router"
 	"flag"
 	"fmt"
@@ -13,7 +16,7 @@ import (
 
 func main() {
 	cfg := flag.Bool("init", false, "create initial config file")
-	version := flag.String("v", "v2", "specify version")
+	version := flag.String("version", "v2", "specify version")
 	flag.Parse()
 
 	if *cfg {
@@ -26,6 +29,19 @@ func main() {
 			return
 		}
 		config.LoadConfig()
+		mqtthandler.ConnectMQTT("localhost:2883")
+		err := consulapi.Connect("http://localhost:9999")
+		if err != nil {
+			panic(err)
+		}
+
+		go consulapi.Monitor(func(what string) {
+			if strings.Contains(what, "Synced check") {
+				fmt.Println("What:", what)
+				mqtthandler.Publish("public/statuschanged", []byte("changed"))
+			}
+		}, context.Background())
+
 		if strings.Compare(*version, "v1") == 0 {
 			v1router.NewRouter().Run(config.Params["bind"].(string))
 		} else {

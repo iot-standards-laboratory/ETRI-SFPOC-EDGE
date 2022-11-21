@@ -14,7 +14,8 @@ func NewRouter() *gin.Engine {
 	apiv2 := apiEngine.Group("api/v2")
 	{
 		// _ = apiv2
-		apiv2.POST("/ctrls/*any", PostCtrl)
+		apiv2.POST("/agents/*any", PostAgent)
+		apiv2.GET("/agents/*any", GetAgent)
 	}
 
 	assetEngine := gin.New()

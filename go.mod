@@ -13,6 +13,7 @@ require (
 	github.com/centrifugal/centrifuge-go v0.9.3
 	github.com/centrifugal/centrifuge/_examples v0.0.0-20221101132607-eaff50641bfb
 	github.com/cristalhq/jwt/v3 v3.1.0
+	github.com/eclipse/paho.mqtt.golang v1.4.2
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-gonic/gin v1.7.7
 	github.com/gofrs/uuid v4.2.0+incompatible
@@ -87,6 +88,7 @@ require (
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
+	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
 	golang.org/x/sys v0.0.0-20220829200755-d48e67d00261 // indirect
 	golang.org/x/text v0.3.7 // indirect
