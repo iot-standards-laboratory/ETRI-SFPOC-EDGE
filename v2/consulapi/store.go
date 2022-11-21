@@ -2,7 +2,6 @@ package consulapi
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/hashicorp/consul/api"
 )
@@ -25,11 +24,6 @@ func Get(key string) ([]byte, error) {
 	kvPair, _, err := client.KV().Get(key, nil)
 	if err != nil {
 		return nil, err
-	}
-
-	list, _ := GetKeys("service")
-	for _, e := range list {
-		fmt.Println(e)
 	}
 
 	if kvPair == nil {

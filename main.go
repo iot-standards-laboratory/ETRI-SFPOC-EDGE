@@ -39,7 +39,6 @@ func main() {
 
 		go consulapi.Monitor(func(what string) {
 			if strings.Contains(what, "Synced check") {
-				fmt.Println("What:", what)
 				mqtthandler.Publish("public/statuschanged", []byte("changed"))
 
 				agents, err := dbstorage.DefaultDB.GetAgents()
@@ -54,7 +53,9 @@ func main() {
 
 					if strings.Compare(status, "passing") != 0 {
 						err := removeCtrlsWithAgentId(agent.ID)
-						fmt.Println(err)
+						if err != nil {
+							return
+						}
 					}
 				}
 

@@ -64,7 +64,6 @@ func PostCtrl(c *gin.Context) {
 		panic(errors.New("invalid service name error"))
 	}
 
-	fmt.Println("payload:", payload)
 	ctrlId, ok := payload["id"].(string)
 	if !ok {
 		panic(errors.New("invalid controller id error"))
@@ -97,7 +96,6 @@ func PostCtrl(c *gin.Context) {
 
 	b, err := consulapi.Get(fmt.Sprintf("svcs/%s", svcName))
 	if b == nil || err != nil {
-		fmt.Println(err)
 		err = consulapi.Put(
 			fmt.Sprintf("svcs/%s", svcName),
 			svcJson,
@@ -133,7 +131,6 @@ func DeleteCtrl(c *gin.Context) {
 		panic(errors.New("invalid service name error"))
 	}
 
-	fmt.Println("payload:", payload)
 	ctrlId, ok := payload["id"].(string)
 	if !ok {
 		panic(errors.New("invalid controller id error"))

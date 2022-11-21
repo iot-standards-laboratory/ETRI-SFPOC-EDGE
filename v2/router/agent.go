@@ -57,7 +57,6 @@ func GetAgent(c *gin.Context) {
 		panic(err)
 	}
 
-	fmt.Println(len(agents))
 	agentsWithStatus := make([]map[string]interface{}, 0, len(agents))
 	for _, agent := range agents {
 		status, err := consulapi.GetStatus(fmt.Sprintf("agent/%s", agent.ID))
@@ -77,7 +76,6 @@ func GetAgent(c *gin.Context) {
 			// "ctrls":  ctrls,
 		})
 
-		fmt.Println(status)
 	}
 	c.JSON(http.StatusOK, agentsWithStatus)
 }

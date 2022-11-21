@@ -24,7 +24,6 @@ func newRouter() *gin.Engine {
 	rt.Use(sessions.SessionsMany([]string{"session", "access_key"}, store))
 	rt.GET("/", func(c *gin.Context) {
 		// s := sessions.Default(c)
-		fmt.Println("^^")
 		s := sessions.DefaultMany(c, "access_key")
 
 		c.Writer.Header().Set("Cache-Control", "no-cache, private, max-age=0")
