@@ -1,14 +1,14 @@
 class Service {
   final String? name, id;
-  final int? numOfDevs;
+  final int? numOfCtrls;
 
-  Service({this.name, this.id, this.numOfDevs});
+  Service({this.name, this.id, this.numOfCtrls});
 
   factory Service.fromJson(dynamic json) {
     return Service(
       name: json['sname'],
       id: json['sid'],
-      numOfDevs: json['ndevs'],
+      numOfCtrls: json['num_clnts'],
     );
   }
 }

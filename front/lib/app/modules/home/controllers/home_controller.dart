@@ -14,11 +14,8 @@ class HomeController extends GetxController {
   var menuIdx = 0.obs;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   var services = <Service>[
-    Service(id: '1-1-1', name: 'devicemanagera', numOfDevs: 7),
-    Service(id: '1-1-1', name: 'devicemanagera', numOfDevs: 7),
-    Service(id: '1-1-1', name: 'devicemanagera', numOfDevs: 7),
-    Service(id: '1-1-1', name: 'devicemanagera', numOfDevs: 7),
-    Service(id: '1-1-1', name: 'devicemanagera', numOfDevs: 7),
+    Service(id: '1-1-1', name: 'devicemanagera', numOfCtrls: 7),
+    Service(id: '2-2-2', name: 'devicemanagerb', numOfCtrls: 7),
   ].obs;
   var agents = <Agent>[
     Agent(
@@ -29,7 +26,7 @@ class HomeController extends GetxController {
   var ctrls = <Controller>[
     Controller(
         id: '1-1-1',
-        name: 'devicemanagera',
+        name: 'etri-Zdtwe2^==',
         agentId: '22222-222222-22222-22222222222'),
   ].obs;
   @override

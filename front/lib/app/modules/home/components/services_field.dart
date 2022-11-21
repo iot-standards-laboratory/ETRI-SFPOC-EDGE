@@ -134,7 +134,7 @@ class ServiceFieldComponent extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 3),
                 child: Text(
-                  '${info.numOfDevs} devices',
+                  '${info.numOfCtrls} devices',
                   style: Theme.of(context).textTheme.caption!.copyWith(
                         color: Colors.white,
                         fontSize: 18,

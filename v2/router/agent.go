@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/json"
 	"etri-sfpoc-edge/v2/consulapi"
 	"fmt"
 	"net/http"
@@ -56,20 +57,50 @@ func GetAgent(c *gin.Context) {
 	}
 
 	fmt.Println(len(agents))
-	ctrlsWithStatus := make([]map[string]interface{}, 0, len(agents))
+	agentsWithStatus := make([]map[string]interface{}, 0, len(agents))
 	for _, agent := range agents {
 		status, err := consulapi.GetStatus(fmt.Sprintf("agent/%s", agent.ID))
 		if err != nil {
 			panic(err)
 		}
-		ctrlsWithStatus = append(ctrlsWithStatus, map[string]interface{}{
+
+		ctrls, err := getCtrlsWithAgentId(agent.ID)
+		if err != nil {
+			panic(err)
+		}
+
+		agentsWithStatus = append(agentsWithStatus, map[string]interface{}{
 			"name":   agent.Name,
 			"id":     agent.ID,
 			"status": status,
+			"ctrls":  ctrls,
 		})
 
 		fmt.Println(status)
 	}
 	consulapi.GetStatus("")
-	c.JSON(http.StatusOK, ctrlsWithStatus)
+	c.JSON(http.StatusOK, agentsWithStatus)
+}
+
+func getCtrlsWithAgentId(agentId string) ([]map[string]interface{}, error) {
+	keys, err := consulapi.GetKeys(fmt.Sprintf("ctrls/%s", agentId))
+	if err != nil {
+		return nil, err
+	}
+
+	ctrls := make([]map[string]interface{}, 0, len(keys))
+	for _, e := range keys {
+		b_ctrl, err := consulapi.Get(e)
+		if err != nil {
+			return nil, err
+		}
+		m_ctrl := map[string]interface{}{}
+		err = json.Unmarshal(b_ctrl, &m_ctrl)
+		if err != nil {
+			return nil, err
+		}
+		ctrls = append(ctrls, m_ctrl)
+	}
+
+	return ctrls, nil
 }
