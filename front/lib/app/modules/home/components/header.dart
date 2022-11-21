@@ -27,7 +27,8 @@ class Header extends GetView<HomeController> {
         if (!Responsive.isMobile(context))
           Spacer(flex: Responsive.isDesktop(context) ? 2 : 1),
         const Expanded(child: SearchField()),
-        const ProfileCard(),
+        const SizedBox(width: defaultPadding),
+        ProfileCard(onPressed: (() {})),
       ],
     );
   }
