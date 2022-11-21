@@ -10,8 +10,8 @@ import (
 
 const ttl = time.Duration(time.Second * 5)
 
-func RegisterCtrl(ctrl model.Controller, endpoint string) error {
-	err := registerEntity(ctrl.CID, endpoint)
+func RegisterAgent(agent model.Agent, endpoint string) error {
+	err := registerEntity(agent.ID, endpoint)
 	if err != nil {
 		panic(err)
 	}

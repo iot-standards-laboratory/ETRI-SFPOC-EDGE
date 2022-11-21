@@ -27,15 +27,15 @@ func PostAgent(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
 	if len(c.Param("any")) <= 1 {
-		ctrl, err := db.AddControllerWithJsonReader(c.Request.Body)
+		agent, err := db.AddAgentWithJsonReader(c.Request.Body)
 		if err != nil {
 			panic(err.Error())
 		}
 
-		c.JSON(http.StatusCreated, ctrl)
+		c.JSON(http.StatusCreated, agent)
 	} else {
-		cid := c.Param("any")[1:]
-		_, err := db.GetController(cid)
+		id := c.Param("any")[1:]
+		_, err := db.GetAgent(id)
 		if err != nil {
 			panic(err)
 		}
@@ -50,20 +50,21 @@ func GetAgent(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
-	ctrls, err := db.GetControllers()
+	agents, err := db.GetAgents()
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(len(ctrls))
-	ctrlsWithStatus := make([]map[string]interface{}, 0, len(ctrls))
-	for _, ctrl := range ctrls {
-		status, err := consulapi.GetStatus(fmt.Sprintf("ctrl/%s", ctrl.CID))
+	fmt.Println(len(agents))
+	ctrlsWithStatus := make([]map[string]interface{}, 0, len(agents))
+	for _, agent := range agents {
+		status, err := consulapi.GetStatus(fmt.Sprintf("agent/%s", agent.ID))
 		if err != nil {
 			panic(err)
 		}
 		ctrlsWithStatus = append(ctrlsWithStatus, map[string]interface{}{
-			"ctrl":   ctrl,
+			"name":   agent.Name,
+			"id":     agent.ID,
 			"status": status,
 		})
 

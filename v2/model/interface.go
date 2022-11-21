@@ -4,8 +4,8 @@ import "io"
 
 type I_DBHandler interface {
 	// GetDevices(string) ([]*Device, int, error)
-	AddControllerWithJsonReader(r io.Reader) (*Controller, error)
-	GetController(cid string) (*Controller, error)
-	GetControllers() ([]*Controller, error)
+	AddAgentWithJsonReader(r io.Reader) (*Agent, error)
+	GetAgent(id string) (*Agent, error)
+	GetAgents() ([]*Agent, error)
 	// IsExistController(cid string) bool
 }

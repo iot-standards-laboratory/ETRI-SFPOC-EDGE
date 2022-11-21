@@ -1,8 +1,6 @@
 package mqtthandler
 
 import (
-	"errors"
-	"etri-sfpoc-edge/config"
 	"fmt"
 	"time"
 
@@ -19,11 +17,7 @@ func mqttHandleFunc(client mqtt.Client, msg mqtt.Message) {
 }
 
 func ConnectMQTT(mqttAddr string) error {
-	cid, ok := config.Params["cid"].(string)
-	if !ok {
-		return errors.New("invalid cid error")
-	}
-	opts := mqtt.NewClientOptions().AddBroker(mqttAddr).SetClientID(cid)
+	opts := mqtt.NewClientOptions().AddBroker(mqttAddr).SetClientID("edge-master")
 
 	opts.SetKeepAlive(60 * time.Second)
 	// Set the message callback handler

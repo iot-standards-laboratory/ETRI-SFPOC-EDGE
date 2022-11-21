@@ -19,7 +19,7 @@ func NewRouter() *gin.Engine {
 	}
 
 	assetEngine := gin.New()
-	assetEngine.Static("/", "./sfpoc_edge_front/build/web")
+	assetEngine.Static("/", "./front/build/web")
 
 	r := gin.New()
 	r.Any("/*any", func(c *gin.Context) {

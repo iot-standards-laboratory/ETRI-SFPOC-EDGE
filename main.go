@@ -5,7 +5,6 @@ import (
 	"errors"
 	"etri-sfpoc-edge/config"
 	"etri-sfpoc-edge/mqtthandler"
-	v1router "etri-sfpoc-edge/v1/router"
 	"etri-sfpoc-edge/v2/consulapi"
 	v2router "etri-sfpoc-edge/v2/router"
 	"flag"
@@ -16,7 +15,6 @@ import (
 
 func main() {
 	cfg := flag.Bool("init", false, "create initial config file")
-	version := flag.String("version", "v2", "specify version")
 	flag.Parse()
 
 	if *cfg {
@@ -29,8 +27,11 @@ func main() {
 			return
 		}
 		config.LoadConfig()
-		mqtthandler.ConnectMQTT("localhost:2883")
-		err := consulapi.Connect("http://localhost:9999")
+		err := mqtthandler.ConnectMQTT("tcp://localhost:2883")
+		if err != nil {
+			panic(err)
+		}
+		err = consulapi.Connect("http://localhost:9999")
 		if err != nil {
 			panic(err)
 		}
@@ -42,11 +43,7 @@ func main() {
 			}
 		}, context.Background())
 
-		if strings.Compare(*version, "v1") == 0 {
-			v1router.NewRouter().Run(config.Params["bind"].(string))
-		} else {
-			v2router.NewRouter().Run(config.Params["bind"].(string))
-		}
+		v2router.NewRouter().Run(config.Params["bind"].(string))
 	}
 
 	// etrisfpocctnmgmt.CreateContainer("hello-world")

@@ -20,6 +20,7 @@ func NewPostgresqlHandler(endpoint, user, pwd, database string) (model.I_DBHandl
 	}
 
 	db.AutoMigrate(&model.Controller{})
+	db.AutoMigrate(&model.Agent{})
 	// db.AutoMigrate(&model.Device{})
 	// db.AutoMigrate(&model.Service{})
 
