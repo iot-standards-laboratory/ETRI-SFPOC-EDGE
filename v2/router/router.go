@@ -23,8 +23,11 @@ func NewRouter() *gin.Engine {
 		apiv2.DELETE("/ctrls/*any", DeleteCtrl)
 
 		apiv2.GET("/svcs/*any", GetSvcs)
-
+		apiv2.PUT("/svcs/*any", PutSvcs)
 	}
+
+	reverseProxyEngine := gin.New()
+	reverseProxyEngine.Any("/*any", reverseProxyHandle)
 
 	assetEngine := gin.New()
 	assetEngine.Static("/", "./front/build/web")
@@ -41,6 +44,8 @@ func NewRouter() *gin.Engine {
 			path := c.Param("any")
 			if strings.HasPrefix(path, "/api/v2") {
 				apiEngine.HandleContext(c)
+			} else if strings.HasPrefix(path, "/svc/") {
+				reverseProxyEngine.HandleContext(c)
 			} else {
 				fmt.Println(path)
 				assetEngine.HandleContext(c)
