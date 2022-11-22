@@ -8,7 +8,7 @@ import (
 	"github.com/segmentio/encoding/json"
 )
 
-func main() {
+func cookieSample() {
 
 	obj := map[string]interface{}{
 		"email":    "email@email.com",
@@ -25,4 +25,17 @@ func main() {
 	cookie := resp.Header.Get("Set-Cookie")
 	fmt.Println("cookie:", cookie)
 
+}
+
+func localAddrSample() {
+	resp, err := http.Get("https://naver.com")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(resp.Request.URL)
+}
+
+func main() {
+	localAddrSample()
 }

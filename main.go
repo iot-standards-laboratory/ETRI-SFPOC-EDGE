@@ -15,6 +15,7 @@ import (
 )
 
 func main() {
+
 	cfg := flag.Bool("init", false, "create initial config file")
 	flag.Parse()
 

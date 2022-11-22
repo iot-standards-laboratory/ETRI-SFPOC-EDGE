@@ -5,21 +5,13 @@ import (
 	"etri-sfpoc-edge/v2/consulapi"
 	"etri-sfpoc-edge/v2/model/dbstorage"
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func connectionParams() map[string]interface{} {
-	// wsAddr, _ := config.Params("wsAddr")
-	// wsAddr, _ := config.Params("wsAddr")
-	// wsAddr, _ := config.Params("wsAddr")
-	return map[string]interface{}{
-		"wsAddr":     "ws://localhost:8000/connection/websocket",
-		"consulAddr": "http://localhost:9999",
-		"mqttAddr":   "tcp://localhost:2883",
-	}
-}
+
 
 func PostAgent(c *gin.Context) {
 	defer handleError(c)
@@ -41,7 +33,16 @@ func PostAgent(c *gin.Context) {
 		if err != nil {
 			panic(err)
 		}
-		c.JSON(http.StatusOK, connectionParams())
+		params := connectionParams()
+
+		addr, err := net.ResolveTCPAddr("tcp", c.Request.RemoteAddr)
+		if err != nil {
+			params["origin"] = ""
+		} else {
+			params["origin"] = addr.IP
+		}
+
+		c.JSON(http.StatusOK, params)
 	}
 }
 

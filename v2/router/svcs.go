@@ -51,6 +51,14 @@ func GetSvcs(c *gin.Context) {
 }
 
 func PostSvcs(c *gin.Context) {
-	// controller에 의해 등록되어 있는지 확인
+	defer handleError(c)
+
+	// 초기 등록
+	if len(c.Param("any")) <= 1 {
+
+		// controller에 의해 등록되어 있는지 확인
+
+	}
+
 	// 내용 수정
 }
