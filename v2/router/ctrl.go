@@ -18,7 +18,14 @@ func GetCtrl(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
-	ctrlKeys, err := consulapi.GetKeys("svcCtrls")
+	svcName := c.Request.Header.Get("service_name")
+
+	key := "svcCtrls"
+	if len(svcName) > 0 {
+		key = fmt.Sprintf("svcCtrls/%s", svcName)
+	}
+
+	ctrlKeys, err := consulapi.GetKeys(key)
 	if err != nil {
 		panic(err)
 	}

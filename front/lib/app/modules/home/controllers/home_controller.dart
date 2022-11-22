@@ -30,10 +30,10 @@ class HomeController extends GetxController {
 
   MqttBrowserClient? mqttClient;
   void mqttInit() async {
-    mqttClient = newMqttClient(mqttAddr: "localhost");
+    mqttClient = newMqttClient(mqttAddr: "mqtt.godopu.com");
 
     final connMess = MqttConnectMessage()
-        .withClientIdentifier('etri/etrismartfarm')
+        // .withClientIdentifier('etri/etrismartfarm')
         .withWillTopic(
             'public/statuschanged') // If you set this you must set a will message
         .withWillMessage('I am user')
@@ -42,7 +42,7 @@ class HomeController extends GetxController {
     mqttClient!.connectionMessage = connMess;
 
     try {
-      await mqttClient!.connect();
+      await mqttClient!.connect('etri', 'etrismartfarm');
     } on Exception catch (e) {
       print('client exception - $e');
       mqttClient!.disconnect();

@@ -1,15 +1,30 @@
 package router
 
 import (
+	"etri-sfpoc-edge/v2/consulapi"
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 func reverseProxyHandle(c *gin.Context) {
-	remote, err := url.Parse("http://localhost:4040")
+	defer handleError(c)
+	path := c.Param("any")
+	id, _, ok := strings.Cut(path[5:], "/")
+	if !ok {
+		id = path[5:]
+	}
+
+	svcAddr, err := consulapi.GetSvcAddr(fmt.Sprintf("svcs/%s", id))
+	if err != nil {
+		panic(err)
+	}
+
+	remote, err := url.Parse("http://" + svcAddr)
 	if err != nil {
 		panic(err)
 	}
@@ -22,7 +37,7 @@ func reverseProxyHandle(c *gin.Context) {
 		req.Host = remote.Host
 		req.URL.Scheme = remote.Scheme
 		req.URL.Host = remote.Host
-		req.URL.Path = "/"
+		req.URL.Path = c.Param("any")
 	}
 
 	proxy.ServeHTTP(c.Writer, c.Request)

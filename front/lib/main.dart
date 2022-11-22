@@ -7,8 +7,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
-  // serverAddr = kIsWeb ? '${Uri.base.host}:${Uri.base.port}' : 'localhost:3000';
-  serverAddr = 'localhost:3000';
+  serverAddr = kIsWeb ? '${Uri.base.host}:${Uri.base.port}' : 'localhost:3000';
+  // serverAddr = 'localhost:3000';
   runApp(const MyApp());
 }
 

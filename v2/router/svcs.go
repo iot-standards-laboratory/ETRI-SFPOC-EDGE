@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -43,6 +44,21 @@ func GetSvcs(c *gin.Context) {
 		ctrlKeys, err := consulapi.GetKeys(fmt.Sprintf("svcCtrls/%s", svcName))
 		if err != nil {
 			panic(err)
+		}
+
+		j_svc["status"] = "enabled"
+		svcId, ok := j_svc["id"]
+		if !ok {
+			j_svc["status"] = "disabled"
+		}
+		// _, err = consulapi.GetSvcAddr(fmt.Sprintf("svcs/%s", svcId))
+		// if err != nil {
+		// 	j_svc["status"] = "disabled"
+		// }
+
+		status, err := consulapi.GetStatus(fmt.Sprintf("svcs/%s", svcId))
+		if err != nil || strings.Compare(status, "passing") != 0 {
+			j_svc["status"] = "disabled"
 		}
 
 		j_svc["num_clnts"] = len(ctrlKeys)

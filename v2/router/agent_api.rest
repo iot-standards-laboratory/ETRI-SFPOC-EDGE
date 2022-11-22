@@ -16,6 +16,7 @@ GET http://localhost:3000/api/v2/svcs
 Content-Type: "application/json"
 
 GET http://localhost:3000/api/v2/ctrls
-Content-Type: "application/json"
+Content-Type: application/json
+service_name: devicemanagera
 
 GET http://localhost:3000/svc/1234

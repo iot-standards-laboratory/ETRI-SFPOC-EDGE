@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -47,7 +46,6 @@ func NewRouter() *gin.Engine {
 			} else if strings.HasPrefix(path, "/svc/") {
 				reverseProxyEngine.HandleContext(c)
 			} else {
-				fmt.Println(path)
 				assetEngine.HandleContext(c)
 			}
 			return

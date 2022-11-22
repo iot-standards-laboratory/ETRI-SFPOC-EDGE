@@ -29,19 +29,17 @@ func main() {
 			return
 		}
 		config.LoadConfig()
-		err := mqtthandler.ConnectMQTT("tcp://localhost:2883")
+		err := mqtthandler.ConnectMQTT("tcp://mqtt.godopu.com:2883")
 		if err != nil {
 			panic(err)
 		}
-		err = consulapi.Connect("http://localhost:9999")
+		err = consulapi.Connect("http://mqtt.godopu.com:9999")
 		if err != nil {
 			panic(err)
 		}
 
 		go consulapi.Monitor(func(what string) {
 			if strings.Contains(what, "Synced check") {
-				mqtthandler.Publish("public/statuschanged", []byte("changed"))
-
 				agents, err := dbstorage.DefaultDB.GetAgents()
 				if err != nil {
 					return
@@ -59,7 +57,7 @@ func main() {
 						}
 					}
 				}
-
+				mqtthandler.Publish("public/statuschanged", []byte("changed"))
 			}
 		}, context.Background())
 
