@@ -42,6 +42,16 @@ func (s *_DBHandler) GetAgent(id string) (*model.Agent, error) {
 	return &agent, nil
 }
 
+func (s *_DBHandler) DeleteAgent(id string) error {
+	result := s.db.Delete(&model.Agent{ID: id})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
 func (s *_DBHandler) GetAgents() ([]*model.Agent, error) {
 	var list []*model.Agent
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"etri-sfpoc-edge/v2/consulapi"
+	"etrisfpocctnmgmt"
 	"fmt"
 	"net"
 	"net/http"
@@ -76,6 +77,9 @@ func PutSvcs(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
 	name := c.Request.Header.Get("name")
+	if len(name) <= 0 {
+		panic(errors.New("invalid service name error"))
+	}
 	b_svcInfo, err := consulapi.Get(fmt.Sprintf("/svcs/%s", name))
 	if err != nil {
 		panic(err)
@@ -116,11 +120,32 @@ func PostSvcs(c *gin.Context) {
 	defer handleError(c)
 
 	// 초기 등록
-	if len(c.Param("any")) <= 1 {
-
-		// controller에 의해 등록되어 있는지 확인
-
+	name := c.Request.Header.Get("name")
+	if len(name) <= 0 {
+		panic(errors.New("invalid service name error"))
+	}
+	b_svcInfo, err := consulapi.Get(fmt.Sprintf("/svcs/%s", name))
+	if err != nil {
+		panic(err)
 	}
 
+	m_svcInfo := map[string]interface{}{}
+	err = json.Unmarshal(b_svcInfo, &m_svcInfo)
+	if err != nil {
+		panic(err)
+	}
+
+	svcId := m_svcInfo["id"].(string)
+
+	if len(svcId) > 0 {
+		panic(errors.New("already installed service"))
+	}
+
+	err = etrisfpocctnmgmt.CreateContainer(name)
+	if err != nil {
+		panic(err)
+	}
+
+	c.String(http.StatusCreated, "installed")
 	// 내용 수정
 }

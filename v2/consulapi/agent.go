@@ -19,9 +19,9 @@ func RegisterAgent(agent model.Agent, endpoint string) error {
 	return nil
 }
 
-func DeregisterCtrl(name string) {
-	client.Agent().ServiceDeregister(name)
+func DeregisterCtrl(name string) error {
 	glog.Infof("[ctrl %v] - deregistered.", name)
+	return client.Agent().ServiceDeregister(name)
 }
 
 func UpdateTTL(check func() (bool, error), name string) {

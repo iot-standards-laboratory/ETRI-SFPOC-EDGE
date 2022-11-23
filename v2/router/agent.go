@@ -2,16 +2,17 @@ package router
 
 import (
 	"encoding/json"
+	"errors"
+	"etri-sfpoc-edge/mqtthandler"
 	"etri-sfpoc-edge/v2/consulapi"
 	"etri-sfpoc-edge/v2/model/dbstorage"
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
-
-
 
 func PostAgent(c *gin.Context) {
 	defer handleError(c)
@@ -44,6 +45,69 @@ func PostAgent(c *gin.Context) {
 
 		c.JSON(http.StatusOK, params)
 	}
+}
+
+func DeleteAgent(c *gin.Context) {
+	defer handleError(c)
+
+	w := c.Writer
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+
+	agent_id := c.Request.Header.Get("agent_id")
+
+	if len(agent_id) <= 1 {
+		panic(errors.New("invalid agent id error"))
+	} else {
+		err := removeCtrlsWithAgentId(agent_id)
+		if err != nil {
+			panic(err)
+		}
+		err = consulapi.DeregisterCtrl(fmt.Sprintf("agent/%s", agent_id))
+		if err != nil {
+			panic(err)
+		}
+		err = dbstorage.DefaultDB.DeleteAgent(agent_id)
+		if err != nil {
+			panic(err)
+		}
+
+		mqtthandler.Publish("public/statuschanged", []byte("changed"))
+
+		c.JSON(http.StatusOK, "deleted")
+	}
+}
+
+func removeCtrlsWithAgentId(agentId string) error {
+	// remove ctrls/{agentid}/ controller
+	fmt.Printf("remove agentCtrls/%s\n", agentId)
+	ctrlKeys, err := consulapi.GetKeys(fmt.Sprintf("agentCtrls/%s", agentId))
+	if err != nil {
+		return err
+	}
+
+	for _, key := range ctrlKeys {
+		err = consulapi.Delete(key)
+		if err != nil {
+			return err
+		}
+	}
+
+	ctrlKeys, err = consulapi.GetKeys("svcCtrls")
+	if err != nil {
+		return err
+	}
+
+	for _, key := range ctrlKeys {
+		if strings.Contains(key, agentId) {
+			err = consulapi.Delete(key)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func GetAgent(c *gin.Context) {
