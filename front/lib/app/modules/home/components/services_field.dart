@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../controllers/home_controller.dart';
+import '../controllers/http_loader.dart';
 
 class ServicesField extends GetView<HomeController> {
   final pageController = PageController(viewportFraction: 1, keepPage: true);
@@ -162,30 +163,16 @@ class ServiceFieldComponent extends StatelessWidget {
                           color: Colors.green,
                         ),
                   IconButton(
-                    icon: Icon(
-                      size: 24,
-                      info.id == ''
-                          ? Icons.download_outlined
-                          : Icons.delete_outlined,
-                      color: Colors.white,
-                    ),
-                    onPressed: () async {
-                      // if (info.id == '') {
-                      //       var response = await http.post(
-                      //         Uri.http(
-                      //           serverAddr,
-                      //           postSvcs,
-                      //         ),
-                      //         headers: <String, String>{
-                      //           'Content-Type': 'application/json; charset=UTF-8',
-                      //         },
-                      //         body: jsonEncode(<String, String>{
-                      //           'name': info.name!,
-                      //         }),
-                      //       );
-                      //     }
-                    },
-                  )
+                      icon: Icon(
+                        size: 24,
+                        info.id == ''
+                            ? Icons.download_outlined
+                            : Icons.delete_outlined,
+                        color: Colors.white,
+                      ),
+                      onPressed: () async {
+                        if (info.id == '') installSvc(info);
+                      }),
                 ],
               ),
             ],

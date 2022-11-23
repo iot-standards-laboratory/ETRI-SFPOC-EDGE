@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"etri-sfpoc-edge/v2/consulapi"
-	"etrisfpocctnmgmt"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
+	"os/exec"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -120,7 +121,7 @@ func PostSvcs(c *gin.Context) {
 	defer handleError(c)
 
 	// 초기 등록
-	name := c.Request.Header.Get("name")
+	name := c.Request.Header.Get("service_name")
 	if len(name) <= 0 {
 		panic(errors.New("invalid service name error"))
 	}
@@ -141,11 +142,49 @@ func PostSvcs(c *gin.Context) {
 		panic(errors.New("already installed service"))
 	}
 
-	err = etrisfpocctnmgmt.CreateContainer(name)
+	err = createContainer(name)
 	if err != nil {
 		panic(err)
 	}
 
 	c.String(http.StatusCreated, "installed")
 	// 내용 수정
+}
+
+func isExist(name string) bool {
+	cmd := strings.Split("container\\ls\\--format\\'{{.Image}} {{.Names}}'\\-a", "\\")
+	bout, err := exec.Command("docker", cmd...).Output()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	sout := strings.Split(string(bout), "\n")
+
+	for _, e := range sout {
+		l := strings.Split(e, " ")
+
+		if len(l) < 2 {
+			continue
+		}
+
+		if name == l[0] {
+			return true
+		}
+	}
+
+	return false
+}
+func createContainer(name string) error {
+
+	if isExist(name) {
+		return nil
+	}
+	args := strings.Split(fmt.Sprintf("container\\run\\-d\\%s", name), "\\")
+	fmt.Println(args)
+	_, err := exec.Command("docker", args...).Output()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

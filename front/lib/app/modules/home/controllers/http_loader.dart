@@ -44,3 +44,15 @@ Future<List<Controller>> loadCtrls() async {
 
   return ctrls;
 }
+
+Future<int> installSvc(Service svc) async {
+  var resp = await http.post(
+    Uri.http(serverAddr, '/api/v2/svcs'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'service_name': svc.name!,
+    },
+  );
+
+  return resp.statusCode;
+}

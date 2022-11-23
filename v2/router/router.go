@@ -24,6 +24,7 @@ func NewRouter() *gin.Engine {
 
 		apiv2.GET("/svcs/*any", GetSvcs)
 		apiv2.PUT("/svcs/*any", PutSvcs)
+		apiv2.POST("/svcs/*any", PostSvcs)
 	}
 
 	reverseProxyEngine := gin.New()
