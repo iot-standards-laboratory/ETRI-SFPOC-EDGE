@@ -14,11 +14,6 @@ import (
 )
 
 func PostAgent(c *gin.Context) {
-	defer handleError(c)
-	w := c.Writer
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-
 	if len(c.Param("any")) <= 1 {
 		agent, err := DB.AddAgentWithJsonReader(c.Request.Body)
 		if err != nil {
@@ -46,12 +41,6 @@ func PostAgent(c *gin.Context) {
 }
 
 func DeleteAgent(c *gin.Context) {
-	defer handleError(c)
-
-	w := c.Writer
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-
 	agent_id := c.Request.Header.Get("agent_id")
 
 	if len(agent_id) <= 1 {
@@ -109,12 +98,6 @@ func removeCtrlsWithAgentId(agentId string) error {
 }
 
 func GetAgent(c *gin.Context) {
-	defer handleError(c)
-
-	w := c.Writer
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-
 	agents, err := DB.GetAgents()
 	if err != nil {
 		panic(err)

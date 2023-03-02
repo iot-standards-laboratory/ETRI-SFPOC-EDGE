@@ -1,4 +1,4 @@
-@masterAddr = localhost:5000
+@masterAddr = localhost:3000
 POST http://{{masterAddr}}/api/v2/agents
 Content-Type: "application/json"
 

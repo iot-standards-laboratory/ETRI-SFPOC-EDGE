@@ -22,8 +22,8 @@ func connectionParams() map[string]interface{} {
 	// wsAddr, _ := config.Params("wsAddr")
 	// wsAddr, _ := config.Params("wsAddr")
 	return map[string]interface{}{
-		"wsAddr":     "ws://mqtt.godopu.com:8000/connection/websocket",
-		"consulAddr": "http://mqtt.godopu.com:9999",
-		"mqttAddr":   "tcp://155.230.34.231:2883",
+		// "wsAddr":     "wss://mqtt.godopu.com:8000/connection/websocket",
+		"consulAddr": "http://etri.godopu.com:9999",
+		"mqttAddr":   "wss://mqtt.godopu.com",
 	}
 }

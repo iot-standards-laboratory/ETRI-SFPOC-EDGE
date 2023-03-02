@@ -11,7 +11,7 @@ import (
 )
 
 func _getAgentKey(id string) string {
-	return fmt.Sprintf("agents/%s", id)
+	return fmt.Sprintf("agents/metadata/%s", id)
 }
 
 func (s *_consulStorage) AddAgentWithJsonReader(r io.Reader) (*model.Agent, error) {
@@ -38,7 +38,7 @@ func (s *_consulStorage) AddAgentWithJsonReader(r io.Reader) (*model.Agent, erro
 }
 
 func (s *_consulStorage) GetAgent(id string) (*model.Agent, error) {
-	b, err := consulapi.Get(fmt.Sprintf("agents/%s", id))
+	b, err := consulapi.Get(_getAgentKey(id))
 	if err != nil {
 		return nil, err
 	}
@@ -57,20 +57,15 @@ func (s *_consulStorage) DeleteAgent(id string) error {
 }
 
 func (s *_consulStorage) GetAgents() ([]*model.Agent, error) {
-	agentKeys, err := consulapi.GetKeys("agents")
+	pairs, err := consulapi.GetPairs("agents/metadata")
 	if err != nil {
 		return nil, err
 	}
 
-	list := make([]*model.Agent, 0, len(agentKeys))
-	for _, key := range agentKeys {
+	list := make([]*model.Agent, 0, len(pairs))
+	for _, pair := range pairs {
 		agent := model.Agent{}
-		b, err := consulapi.Get(key)
-		if err != nil {
-			continue
-		}
-
-		err = json.Unmarshal(b, &agent)
+		err := json.Unmarshal(pair.Value, &agent)
 		if err != nil {
 			continue
 		}

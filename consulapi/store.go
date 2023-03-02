@@ -15,8 +15,18 @@ func Put(key string, value []byte) error {
 	return err
 }
 
+func GetPairs(prefix string) (api.KVPairs, error) {
+	pairs, _, err := client.KV().List(prefix, &api.QueryOptions{
+		UseCache: true,
+	})
+
+	return pairs, err
+}
+
 func GetKeys(prefix string) ([]string, error) {
-	list, _, err := client.KV().Keys(prefix, "", nil)
+	list, _, err := client.KV().Keys(prefix, "", &api.QueryOptions{
+		UseCache: true,
+	})
 	return list, err
 }
 

@@ -35,6 +35,11 @@ func NewRouter() *gin.Engine {
 
 	r := gin.New()
 	r.Any("/*any", func(c *gin.Context) {
+		defer handleError(c)
+		w := c.Writer
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+
 		remote, err := getRemoteURL(c.Request.Host)
 		if err != nil {
 			c.String(http.StatusNoContent, "wrong host is indicated")
