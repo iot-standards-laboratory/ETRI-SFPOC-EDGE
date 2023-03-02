@@ -1,0 +1,9 @@
+@masterAddr = localhost:5000
+POST http://{{masterAddr}}/api/v2/agents
+Content-Type: "application/json"
+
+{
+    "name": "KNU-agent"
+}
+
+GET http://{{masterAddr}}/api/v2/agents

@@ -3,7 +3,7 @@ package router
 import (
 	"encoding/json"
 	"errors"
-	"etri-sfpoc-edge/v2/consulapi"
+	"etri-sfpoc-edge/consulapi"
 	"fmt"
 	"log"
 	"net"
@@ -179,7 +179,7 @@ func createContainer(name string) error {
 	if isExist(name) {
 		return nil
 	}
-	args := strings.Split(fmt.Sprintf("container\\run\\-d\\%s", name), "\\")
+	args := strings.Split(fmt.Sprintf("container\\run\\--restart\\always\\-d\\%s", name), "\\")
 	fmt.Println(args)
 	_, err := exec.Command("docker", args...).Output()
 	if err != nil {

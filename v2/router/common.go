@@ -2,10 +2,13 @@ package router
 
 import (
 	"etri-sfpoc-edge/logger"
+	"etri-sfpoc-edge/model/consulstorage"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+var DB = consulstorage.DefaultDB
 
 func handleError(c *gin.Context) {
 	if r := recover(); r != nil {

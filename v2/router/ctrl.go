@@ -3,8 +3,8 @@ package router
 import (
 	"encoding/json"
 	"errors"
+	"etri-sfpoc-edge/consulapi"
 	"etri-sfpoc-edge/mqtthandler"
-	"etri-sfpoc-edge/v2/consulapi"
 	"fmt"
 	"net/http"
 

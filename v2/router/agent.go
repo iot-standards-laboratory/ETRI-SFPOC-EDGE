@@ -3,9 +3,8 @@ package router
 import (
 	"encoding/json"
 	"errors"
+	"etri-sfpoc-edge/consulapi"
 	"etri-sfpoc-edge/mqtthandler"
-	"etri-sfpoc-edge/v2/consulapi"
-	"etri-sfpoc-edge/v2/model/dbstorage"
 	"fmt"
 	"net"
 	"net/http"
@@ -16,13 +15,12 @@ import (
 
 func PostAgent(c *gin.Context) {
 	defer handleError(c)
-
 	w := c.Writer
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
 	if len(c.Param("any")) <= 1 {
-		agent, err := dbstorage.DefaultDB.AddAgentWithJsonReader(c.Request.Body)
+		agent, err := DB.AddAgentWithJsonReader(c.Request.Body)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -30,7 +28,7 @@ func PostAgent(c *gin.Context) {
 		c.JSON(http.StatusCreated, agent)
 	} else {
 		id := c.Param("any")[1:]
-		_, err := dbstorage.DefaultDB.GetAgent(id)
+		_, err := DB.GetAgent(id)
 		if err != nil {
 			panic(err)
 		}
@@ -67,7 +65,7 @@ func DeleteAgent(c *gin.Context) {
 		if err != nil {
 			panic(err)
 		}
-		err = dbstorage.DefaultDB.DeleteAgent(agent_id)
+		err = DB.DeleteAgent(agent_id)
 		if err != nil {
 			panic(err)
 		}
@@ -117,7 +115,7 @@ func GetAgent(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
-	agents, err := dbstorage.DefaultDB.GetAgents()
+	agents, err := DB.GetAgents()
 	if err != nil {
 		panic(err)
 	}
@@ -126,22 +124,23 @@ func GetAgent(c *gin.Context) {
 	for _, agent := range agents {
 		status, err := consulapi.GetStatus(fmt.Sprintf("agent/%s", agent.ID))
 		if err != nil {
-			panic(err)
+			continue
 		}
 
-		// ctrls, err := getCtrlsWithAgentId(agent.ID)
-		// if err != nil {
-		// 	panic(err)
-		// }
+		ctrls, err := getCtrlsWithAgentId(agent.ID)
+		if err != nil {
+			panic(err)
+		}
 
 		agentsWithStatus = append(agentsWithStatus, map[string]interface{}{
 			"name":   agent.Name,
 			"id":     agent.ID,
 			"status": status,
-			// "ctrls":  ctrls,
+			"ctrls":  ctrls,
 		})
 
 	}
+
 	c.JSON(http.StatusOK, agentsWithStatus)
 }
 

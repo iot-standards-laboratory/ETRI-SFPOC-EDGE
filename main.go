@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"etri-sfpoc-edge/config"
+	"etri-sfpoc-edge/consulapi"
+	"etri-sfpoc-edge/model/consulstorage"
 	"etri-sfpoc-edge/mqtthandler"
-	"etri-sfpoc-edge/v2/consulapi"
-	"etri-sfpoc-edge/v2/model/dbstorage"
 	v2router "etri-sfpoc-edge/v2/router"
 	"flag"
 	"fmt"
@@ -29,18 +29,19 @@ func main() {
 			return
 		}
 		config.LoadConfig()
-		err := mqtthandler.ConnectMQTT("tcp://mqtt.godopu.com:2883")
+		err := mqtthandler.ConnectMQTT("wss://mqtt.godopu.com")
 		if err != nil {
 			panic(err)
 		}
-		err = consulapi.Connect("http://mqtt.godopu.com:9999")
+		err = consulapi.Connect("http://localhost:9999")
 		if err != nil {
 			panic(err)
 		}
 
+		// 상태 변경 시 알림 전달
 		go consulapi.Monitor(func(what string) {
 			if strings.Contains(what, "Synced check") {
-				agents, err := dbstorage.DefaultDB.GetAgents()
+				agents, err := consulstorage.DefaultDB.GetAgents()
 				if err != nil {
 					return
 				}
@@ -66,7 +67,6 @@ func main() {
 
 	// etrisfpocctnmgmt.CreateContainer("hello-world")
 }
-
 func removeCtrlsWithAgentId(agentId string) error {
 	// remove ctrls/{agentid}/ controller
 	fmt.Printf("remove agentCtrls/%s\n", agentId)

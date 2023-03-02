@@ -1,7 +1,7 @@
 package router
 
 import (
-	"etri-sfpoc-edge/v2/consulapi"
+	"etri-sfpoc-edge/consulapi"
 	"fmt"
 	"net/http"
 	"net/http/httputil"

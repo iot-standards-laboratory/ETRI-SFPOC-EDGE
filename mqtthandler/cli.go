@@ -7,8 +7,8 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-const user = "etri"
-const passwd = "etrismartfarm"
+const user = "etrimqtt"
+const passwd = "fainal2311"
 
 var client mqtt.Client
 

@@ -1,0 +1,13 @@
+[Unit]
+Description=Run Smart Farm PoC Controller
+After=multi-user.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ubuntu/pugit/sfpoc/ETRI-SFPOC-EDGE
+ExecStart=/home/ubuntu/pugit/sfpoc/ETRI-SFPOC-EDGE/edge-app
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
