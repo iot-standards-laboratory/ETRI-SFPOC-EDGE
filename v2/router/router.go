@@ -31,7 +31,7 @@ func NewRouter() *gin.Engine {
 	reverseProxyEngine.Any("/*any", reverseProxyHandle)
 
 	assetEngine := gin.New()
-	assetEngine.Static("/", "./front/build/web")
+	assetEngine.Static("/", "../ETRI-SFPOC-EDGE_front/web")
 
 	r := gin.New()
 	r.Any("/*any", func(c *gin.Context) {
