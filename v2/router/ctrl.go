@@ -19,7 +19,6 @@ func GetCtrl(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
 	svcName := c.Request.Header.Get("service_name")
-
 	key := "svcCtrls"
 	if len(svcName) > 0 {
 		key = fmt.Sprintf("svcCtrls/%s", svcName)
@@ -49,6 +48,7 @@ func GetCtrl(c *gin.Context) {
 
 	c.JSON(http.StatusOK, l_ctrls)
 }
+
 func PostCtrl(c *gin.Context) {
 	defer handleError(c)
 

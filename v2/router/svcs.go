@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"etri-sfpoc-edge/consulapi"
+	"etri-sfpoc-edge/mqtthandler"
 	"fmt"
 	"log"
 	"net"
@@ -81,7 +82,7 @@ func PutSvcs(c *gin.Context) {
 	if len(name) <= 0 {
 		panic(errors.New("invalid service name error"))
 	}
-	b_svcInfo, err := consulapi.Get(fmt.Sprintf("/svcs/%s", name))
+	b_svcInfo, err := consulapi.Get(fmt.Sprintf("svcs/%s", name))
 	if err != nil {
 		panic(err)
 	}
@@ -94,16 +95,7 @@ func PutSvcs(c *gin.Context) {
 
 	id, ok := m_svcInfo["id"].(string)
 	if !ok || len(id) <= 0 {
-		id := uuid.New().String()
-		m_svcInfo["id"] = id
-		b_svcInfo, err = json.Marshal(m_svcInfo)
-		if err != nil {
-			panic(err)
-		}
-		err = consulapi.Put(fmt.Sprintf("svcs/%s", name), b_svcInfo)
-		if err != nil {
-			panic(err)
-		}
+		panic(errors.New("invalid id"))
 	}
 
 	originAddr, _ := net.ResolveTCPAddr("tcp", c.Request.RemoteAddr)
@@ -125,7 +117,7 @@ func PostSvcs(c *gin.Context) {
 	if len(name) <= 0 {
 		panic(errors.New("invalid service name error"))
 	}
-	b_svcInfo, err := consulapi.Get(fmt.Sprintf("/svcs/%s", name))
+	b_svcInfo, err := consulapi.Get(fmt.Sprintf("svcs/%s", name))
 	if err != nil {
 		panic(err)
 	}
@@ -137,12 +129,22 @@ func PostSvcs(c *gin.Context) {
 	}
 
 	svcId := m_svcInfo["id"].(string)
-
 	if len(svcId) > 0 {
 		panic(errors.New("already installed service"))
 	}
 
-	err = createContainer(name)
+	svcId = uuid.New().String()
+	m_svcInfo["id"] = svcId
+	b_svcInfo, err = json.Marshal(m_svcInfo)
+	if err != nil {
+		panic(err)
+	}
+	err = consulapi.Put(fmt.Sprintf("svcs/%s", name), b_svcInfo)
+	if err != nil {
+		panic(err)
+	}
+
+	err = createContainer(svcId, name)
 	if err != nil {
 		panic(err)
 	}
@@ -151,8 +153,56 @@ func PostSvcs(c *gin.Context) {
 	// 내용 수정
 }
 
-func isExist(name string) bool {
-	cmd := strings.Split("container\\ls\\--format\\'{{.Image}} {{.Names}}'\\-a", "\\")
+func DeleteSvcs(c *gin.Context) {
+	defer handleError(c)
+
+	// 초기 등록
+	name := c.Request.Header.Get("service_name")
+	if len(name) <= 0 {
+		panic(errors.New("invalid service name error"))
+	}
+
+	b_svcInfo, err := consulapi.Get(fmt.Sprintf("svcs/%s", name))
+	if err != nil {
+		panic(err)
+	}
+
+	m_svcInfo := map[string]interface{}{}
+	err = json.Unmarshal(b_svcInfo, &m_svcInfo)
+	if err != nil {
+		panic(err)
+	}
+	svcId, ok := m_svcInfo["id"].(string)
+	if !ok {
+		panic(errors.New("invalid service id error"))
+	}
+
+	consulapi.DeregisterCtrl("svcs/" + svcId)
+
+	m_svcInfo["id"] = ""
+
+	b_obj, err := json.Marshal(m_svcInfo)
+	if err != nil {
+		panic(err)
+	}
+
+	err = consulapi.Put(fmt.Sprintf("svcs/%s", name), b_obj)
+	if err != nil {
+		panic(err)
+	}
+
+	err = deleteContainer(svcId)
+	if err != nil {
+		panic(err)
+	}
+
+	mqtthandler.Publish("public/statuschanged", []byte("changed"))
+	c.String(http.StatusOK, "removed")
+}
+
+func isExist(id string) bool {
+	cmd := strings.Split("container\\ls\\--format\\{{.Names}}\\-a", "\\")
+	fmt.Println(cmd)
 	bout, err := exec.Command("docker", cmd...).Output()
 	if err != nil {
 		log.Fatalln(err)
@@ -161,25 +211,36 @@ func isExist(name string) bool {
 	sout := strings.Split(string(bout), "\n")
 
 	for _, e := range sout {
-		l := strings.Split(e, " ")
-
-		if len(l) < 2 {
-			continue
-		}
-
-		if name == l[0] {
+		if strings.Compare(e, id) == 0 {
 			return true
 		}
 	}
 
 	return false
 }
-func createContainer(name string) error {
 
-	if isExist(name) {
+func createContainer(id, name string) error {
+
+	if isExist(id) {
 		return nil
 	}
-	args := strings.Split(fmt.Sprintf("container\\run\\--restart\\always\\-d\\%s", name), "\\")
+	args := strings.Split(fmt.Sprintf("container\\run\\--restart\\always\\--name\\%s\\-d\\%s", id, name), "\\")
+	fmt.Println(args)
+	_, err := exec.Command("docker", args...).Output()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func deleteContainer(id string) error {
+	if !isExist(id) {
+		fmt.Println("not exist")
+		return nil
+	}
+
+	args := strings.Split(fmt.Sprintf("container\\rm\\-v\\-f\\%s", id), "\\")
 	fmt.Println(args)
 	_, err := exec.Command("docker", args...).Output()
 	if err != nil {

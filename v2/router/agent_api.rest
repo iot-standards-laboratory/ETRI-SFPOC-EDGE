@@ -20,3 +20,6 @@ Content-Type: application/json
 service_name: devicemanagera
 
 GET http://localhost:3000/svc/1234
+
+DELETE https://etri.godopu.com/api/v2/svcs
+service_name: devicemanagera

@@ -25,6 +25,7 @@ func NewRouter() *gin.Engine {
 		apiv2.GET("/svcs/*any", GetSvcs)
 		apiv2.PUT("/svcs/*any", PutSvcs)
 		apiv2.POST("/svcs/*any", PostSvcs)
+		apiv2.DELETE("/svcs/*any", DeleteSvcs)
 	}
 
 	reverseProxyEngine := gin.New()
@@ -39,7 +40,6 @@ func NewRouter() *gin.Engine {
 		w := c.Writer
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-
 		remote, err := getRemoteURL(c.Request.Host)
 		if err != nil {
 			c.String(http.StatusNoContent, "wrong host is indicated")

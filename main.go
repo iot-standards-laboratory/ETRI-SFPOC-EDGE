@@ -31,7 +31,6 @@ func main() {
 
 	cfg := flag.Bool("init", false, "create initial config file")
 	flag.Parse()
-
 	if *cfg {
 		config.CreateInitFile()
 	} else {
@@ -77,9 +76,8 @@ func main() {
 
 		v2router.NewRouter().Run(config.Params["bind"].(string))
 	}
-
-	// etrisfpocctnmgmt.CreateContainer("hello-world")
 }
+
 func removeCtrlsWithAgentId(agentId string) error {
 	// remove ctrls/{agentid}/ controller
 	fmt.Printf("remove agentCtrls/%s\n", agentId)
