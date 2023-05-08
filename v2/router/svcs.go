@@ -40,31 +40,29 @@ func GetSvcs(c *gin.Context) {
 			panic(err)
 		}
 
-		svcName, ok := j_svc["name"]
+		j_svc["status"] = "enabled"
+
+		svcId, ok := j_svc["id"]
 		if !ok {
 			panic(errors.New("invalid service name error"))
 		}
-		ctrlKeys, err := consulapi.GetKeys(fmt.Sprintf("svcCtrls/%s", svcName))
+
+		ctrlKeys, err := consulapi.GetKeys(fmt.Sprintf("svcCtrls/%s", svcId))
 		if err != nil {
 			panic(err)
 		}
-
-		j_svc["status"] = "enabled"
-		svcId, ok := j_svc["id"]
-		if !ok {
-			j_svc["status"] = "disabled"
-		}
-		// _, err = consulapi.GetSvcAddr(fmt.Sprintf("svcs/%s", svcId))
-		// if err != nil {
-		// 	j_svc["status"] = "disabled"
-		// }
-
-		status, err := consulapi.GetStatus(fmt.Sprintf("svcs/%s", svcId))
-		if err != nil || strings.Compare(status, "passing") != 0 {
-			j_svc["status"] = "disabled"
-		}
-
 		j_svc["num_clnts"] = len(ctrlKeys)
+
+		cid, ok := j_svc["cid"].(string)
+		if !ok || len(cid) == 0 {
+			j_svc["status"] = "disabled"
+		} else {
+			status, err := consulapi.GetStatus(fmt.Sprintf("svcs/%s", cid))
+			if err != nil || strings.Compare(status, "passing") != 0 {
+				j_svc["status"] = "disabled"
+			}
+		}
+
 		svcs = append(svcs, j_svc)
 	}
 
@@ -78,11 +76,11 @@ func PutSvcs(c *gin.Context) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
-	name := c.Request.Header.Get("name")
-	if len(name) <= 0 {
-		panic(errors.New("invalid service name error"))
+	id := c.Request.Header.Get("id")
+	if len(id) <= 0 {
+		panic(errors.New("invalid service id error"))
 	}
-	b_svcInfo, err := consulapi.Get(fmt.Sprintf("svcs/%s", name))
+	b_svcInfo, err := consulapi.Get(fmt.Sprintf("svcs/%s", id))
 	if err != nil {
 		panic(err)
 	}
@@ -91,11 +89,6 @@ func PutSvcs(c *gin.Context) {
 	err = json.Unmarshal(b_svcInfo, &m_svcInfo)
 	if err != nil {
 		panic(err)
-	}
-
-	id, ok := m_svcInfo["id"].(string)
-	if !ok || len(id) <= 0 {
-		panic(errors.New("invalid id"))
 	}
 
 	originAddr, _ := net.ResolveTCPAddr("tcp", c.Request.RemoteAddr)
@@ -113,11 +106,11 @@ func PostSvcs(c *gin.Context) {
 	defer handleError(c)
 
 	// 초기 등록
-	name := c.Request.Header.Get("service_name")
-	if len(name) <= 0 {
+	id := c.Request.Header.Get("service_id")
+	if len(id) <= 0 {
 		panic(errors.New("invalid service name error"))
 	}
-	b_svcInfo, err := consulapi.Get(fmt.Sprintf("svcs/%s", name))
+	b_svcInfo, err := consulapi.Get(fmt.Sprintf("svcs/%s", id))
 	if err != nil {
 		panic(err)
 	}
@@ -128,24 +121,28 @@ func PostSvcs(c *gin.Context) {
 		panic(err)
 	}
 
-	svcId := m_svcInfo["id"].(string)
-	if len(svcId) > 0 {
+	// check the identifier of container for the service
+	cid := m_svcInfo["cid"].(string)
+	if len(cid) > 0 {
 		panic(errors.New("already installed service"))
 	}
 
-	svcId = uuid.New().String()
-	m_svcInfo["id"] = svcId
+	cid = uuid.New().String()
+
+	m_svcInfo["cid"] = cid
 	b_svcInfo, err = json.Marshal(m_svcInfo)
 	if err != nil {
 		panic(err)
 	}
-	err = consulapi.Put(fmt.Sprintf("svcs/%s", name), b_svcInfo)
+
+	err = consulapi.Put(fmt.Sprintf("svcs/%s", id), b_svcInfo)
 	if err != nil {
 		panic(err)
 	}
 
-	err = createContainer(svcId, name)
+	err = createContainer(cid, id)
 	if err != nil {
+		// remove the container information from consul
 		panic(err)
 	}
 
@@ -156,13 +153,12 @@ func PostSvcs(c *gin.Context) {
 func DeleteSvcs(c *gin.Context) {
 	defer handleError(c)
 
-	// 초기 등록
-	name := c.Request.Header.Get("service_name")
-	if len(name) <= 0 {
-		panic(errors.New("invalid service name error"))
+	id := c.Request.Header.Get("service_id")
+	if len(id) <= 0 {
+		panic(errors.New("invalid service id error"))
 	}
 
-	b_svcInfo, err := consulapi.Get(fmt.Sprintf("svcs/%s", name))
+	b_svcInfo, err := consulapi.Get(fmt.Sprintf("svcs/%s", id))
 	if err != nil {
 		panic(err)
 	}
@@ -172,26 +168,29 @@ func DeleteSvcs(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	svcId, ok := m_svcInfo["id"].(string)
+	fmt.Println(m_svcInfo)
+
+	cid, ok := m_svcInfo["cid"].(string)
 	if !ok {
 		panic(errors.New("invalid service id error"))
 	}
 
-	consulapi.DeregisterCtrl("svcs/" + svcId)
+	consulapi.DeregisterCtrl("svcs/" + cid)
 
-	m_svcInfo["id"] = ""
+	m_svcInfo["cid"] = ""
 
 	b_obj, err := json.Marshal(m_svcInfo)
 	if err != nil {
 		panic(err)
 	}
 
-	err = consulapi.Put(fmt.Sprintf("svcs/%s", name), b_obj)
+	err = consulapi.Put(fmt.Sprintf("svcs/%s", id), b_obj)
 	if err != nil {
 		panic(err)
 	}
 
-	err = deleteContainer(svcId)
+	fmt.Println("remove container:", cid)
+	err = deleteContainer(cid)
 	if err != nil {
 		panic(err)
 	}
@@ -219,12 +218,12 @@ func isExist(id string) bool {
 	return false
 }
 
-func createContainer(id, name string) error {
+func createContainer(cid, id string) error {
 
 	if isExist(id) {
 		return nil
 	}
-	args := strings.Split(fmt.Sprintf("container\\run\\--restart\\always\\--name\\%s\\-d\\%s", id, name), "\\")
+	args := strings.Split(fmt.Sprintf("container\\run\\--restart\\always\\--name\\%s\\-d\\hub.godopu.com/%s", cid, id), "\\")
 	fmt.Println(args)
 	_, err := exec.Command("docker", args...).Output()
 	if err != nil {

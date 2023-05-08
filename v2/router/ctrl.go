@@ -71,6 +71,12 @@ func PostCtrl(c *gin.Context) {
 		panic(errors.New("invalid service name error"))
 	}
 
+	svcId, ok := payload["service_id"].(string)
+	// please check service id
+	if !ok {
+		panic(errors.New("invalid service id error"))
+	}
+
 	ctrlId, ok := payload["id"].(string)
 	if !ok {
 		panic(errors.New("invalid controller id error"))
@@ -86,7 +92,7 @@ func PostCtrl(c *gin.Context) {
 	}
 
 	err = consulapi.Put(
-		fmt.Sprintf("svcCtrls/%s/%s/%s", svcName, agentId, ctrlId),
+		fmt.Sprintf("svcCtrls/%s/%s/%s", svcId, agentId, ctrlId),
 		json_payload,
 	)
 	if err != nil {
@@ -95,16 +101,17 @@ func PostCtrl(c *gin.Context) {
 
 	svcJson, err := json.Marshal(map[string]interface{}{
 		"name": svcName,
-		"id":   "",
+		"id":   svcId,
+		"cid":  "",
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	b, err := consulapi.Get(fmt.Sprintf("svcs/%s", svcName))
+	b, err := consulapi.Get(fmt.Sprintf("svcs/%s", svcId))
 	if b == nil || err != nil {
 		err = consulapi.Put(
-			fmt.Sprintf("svcs/%s", svcName),
+			fmt.Sprintf("svcs/%s", svcId),
 			svcJson,
 		)
 		if err != nil {
@@ -133,7 +140,7 @@ func DeleteCtrl(c *gin.Context) {
 		panic(errors.New("invalid agent id error"))
 	}
 
-	svcName, ok := payload["service_name"].(string)
+	svcId, ok := payload["service_id"].(string)
 	if !ok {
 		panic(errors.New("invalid service name error"))
 	}
@@ -148,7 +155,7 @@ func DeleteCtrl(c *gin.Context) {
 		panic(err)
 	}
 
-	err = consulapi.Delete(fmt.Sprintf("svcCtrls/%s/%s/%s", svcName, agentId, ctrlId))
+	err = consulapi.Delete(fmt.Sprintf("svcCtrls/%s/%s/%s", svcId, agentId, ctrlId))
 	if err != nil {
 		panic(err)
 	}
