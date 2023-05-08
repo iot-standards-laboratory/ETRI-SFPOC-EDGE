@@ -14,21 +14,7 @@ import (
 	"strings"
 )
 
-// func main() {
-// 	err := consulapi.Connect("http://etri.godopu.com:9999")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	agent, err := consulstorage.DefaultDB.GetAgent("ed62e012-71f9-4e4d-8a84-d28bb0862cc5")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	consulapi.RegisterAgent(*agent, "http://129.254.164.223:4000")
-// }
-
 func main() {
-
 	cfg := flag.Bool("init", false, "create initial config file")
 	flag.Parse()
 	if *cfg {
