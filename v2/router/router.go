@@ -82,6 +82,7 @@ func NewRunningRouter() *gin.Engine {
 		if err != nil {
 			c.String(http.StatusNoContent, "wrong host is indicated")
 			return
+			
 		}
 
 		if remote == nil {
