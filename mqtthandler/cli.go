@@ -17,7 +17,7 @@ func mqttHandleFunc(client mqtt.Client, msg mqtt.Message) {
 }
 
 func ConnectMQTT(mqttAddr string) error {
-	opts := mqtt.NewClientOptions().AddBroker(mqttAddr).SetClientID("edge-master")
+	opts := mqtt.NewClientOptions().AddBroker(mqttAddr).SetClientID("edge-master-debug")
 
 	opts.SetKeepAlive(60 * time.Second)
 	// Set the message callback handler

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"etri-sfpoc-edge/config"
 	"etri-sfpoc-edge/logger"
 	"etri-sfpoc-edge/model/consulstorage"
 	"net/http"
@@ -22,8 +23,7 @@ func connectionParams() map[string]interface{} {
 	// wsAddr, _ := config.Params("wsAddr")
 	// wsAddr, _ := config.Params("wsAddr")
 	return map[string]interface{}{
-		// "wsAddr":     "wss://mqtt.godopu.com:8000/connection/websocket",
-		"consulAddr": "http://etri.godopu.com:9999",
-		"mqttAddr":   "wss://mqtt.godopu.com",
+		"consulAddr": config.Params["consulAddr"].(string),
+		"mqttAddr":   config.Params["mqttAddr"].(string),
 	}
 }

@@ -5,63 +5,109 @@ import (
 	"errors"
 	"etri-sfpoc-edge/config"
 	"etri-sfpoc-edge/consulapi"
+	"etri-sfpoc-edge/controller/connmgmt"
+	"etri-sfpoc-edge/controller/state"
 	"etri-sfpoc-edge/model/consulstorage"
 	"etri-sfpoc-edge/mqtthandler"
-	v2router "etri-sfpoc-edge/v2/router"
-	"flag"
+	"etri-sfpoc-edge/v2/router"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"strings"
 )
 
 func main() {
-	cfg := flag.Bool("init", false, "create initial config file")
-	flag.Parse()
-	if *cfg {
-		config.CreateInitFile()
+	stateStream := state.Subscribe()
+	if _, err := os.Stat("./config.properties"); errors.Is(err, os.ErrNotExist) {
+		state.Put(state.STATE_INITIALIZING)
 	} else {
-		if _, err := os.Stat("./config.properties"); errors.Is(err, os.ErrNotExist) {
-			// path/to/whatever does not exist
-			fmt.Println("config file doesn't exist")
-			fmt.Println("please add -init option to create config file")
-			return
-		}
-		config.LoadConfig()
-		err := mqtthandler.ConnectMQTT("wss://mqtt.godopu.com")
-		if err != nil {
-			panic(err)
-		}
-		err = consulapi.Connect("http://localhost:9999")
-		if err != nil {
-			panic(err)
-		}
+		state.Put(state.STATE_RUNNING)
+	}
 
-		// 상태 변경 시 알림 전달
-		go consulapi.Monitor(func(what string) {
-			if strings.Contains(what, "Synced check") {
-				agents, err := consulstorage.DefaultDB.GetAgents()
-				if err != nil {
-					return
+	// go v2router.NewRouter().Run(config.Params["bind"].(string))
+
+	var srv *http.Server = nil
+
+	for currentState := range stateStream {
+		fmt.Println(currentState)
+		switch currentState {
+		case state.STATE_INITIALIZING:
+			mux, err := router.NewRouter(state.STATE_INITIALIZING)
+			if err != nil {
+				panic(err)
+			}
+			srv = &http.Server{
+				Addr:    ":3000",
+				Handler: mux,
+			}
+
+			go func() {
+				if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+					log.Fatalf("listen: %s\n", err)
 				}
-				for _, agent := range agents {
-					status, err := consulapi.GetStatus(fmt.Sprintf("agent/%s", agent.ID))
+
+				log.Println("close initializing")
+			}()
+
+		case state.STATE_INITIALIZED:
+			err := srv.Shutdown(context.Background())
+			if err != nil {
+				panic(err)
+			}
+
+			config.CreateInitFile()
+			state.Put(state.STATE_RUNNING)
+
+		case state.STATE_RUNNING:
+			config.LoadConfig()
+			err := connmgmt.Connect(config.Params["mqttAddr"].(string), config.Params["consulAddr"].(string))
+			if err != nil {
+				panic(err)
+			}
+
+			go consulapi.Monitor(func(what string) {
+				if strings.Contains(what, "Synced check") {
+					agents, err := consulstorage.DefaultDB.GetAgents()
 					if err != nil {
 						return
 					}
-
-					if strings.Compare(status, "passing") != 0 {
-						err := removeCtrlsWithAgentId(agent.ID)
+					for _, agent := range agents {
+						status, err := consulapi.GetStatus(fmt.Sprintf("agent/%s", agent.ID))
 						if err != nil {
 							return
 						}
-					}
-				}
-				mqtthandler.Publish("public/statuschanged", []byte("changed"))
-			}
-		}, context.Background())
 
-		v2router.NewRouter().Run(config.Params["bind"].(string))
+						if strings.Compare(status, "passing") != 0 {
+							err := removeCtrlsWithAgentId(agent.ID)
+							if err != nil {
+								return
+							}
+						}
+					}
+					mqtthandler.Publish("public/statuschanged", []byte("changed"))
+				}
+			}, context.Background())
+
+			mux, err := router.NewRouter(state.STATE_RUNNING)
+			if err != nil {
+				panic(err)
+			}
+
+			srv = &http.Server{
+				Addr:    ":3000",
+				Handler: mux,
+			}
+			srv.ListenAndServe()
+		}
 	}
+
+	// if *cfg {
+	// 	config.CreateInitFile()
+	// } else {
+	// 	// 상태 변경 시 알림 전달
+
+	// }
 }
 
 func removeCtrlsWithAgentId(agentId string) error {

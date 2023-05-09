@@ -1,6 +1,8 @@
 package router
 
 import (
+	"errors"
+	"etri-sfpoc-edge/controller/state"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -9,7 +11,43 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter() *gin.Engine {
+func NewRouter(st state.IState) (*gin.Engine, error) {
+	switch st {
+	case state.STATE_INITIALIZING:
+		return NewInitRouter(), nil
+	case state.STATE_RUNNING:
+		return NewRunningRouter(), nil
+	default:
+		return nil, errors.New("invalid state error")
+	}
+}
+
+func NewInitRouter() *gin.Engine {
+	assetEngine := gin.New()
+	assetEngine.Static("/", "../ETRI-SFPOC-EDGE_front/web")
+
+	r := gin.New()
+	r.Any("/*any", func(c *gin.Context) {
+		defer handleError(c)
+		w := c.Writer
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+
+		path := c.Param("any")
+		// assetEngine.HandleContext(c)
+		if path == "/loading" {
+			c.JSON(http.StatusOK, map[string]interface{}{
+				"page": "/init",
+			})
+		} else {
+			assetEngine.HandleContext(c)
+		}
+	})
+
+	return r
+}
+
+func NewRunningRouter() *gin.Engine {
 	apiEngine := gin.New()
 	apiv2 := apiEngine.Group("api/v2")
 	{
@@ -52,6 +90,10 @@ func NewRouter() *gin.Engine {
 				apiEngine.HandleContext(c)
 			} else if strings.HasPrefix(path, "/svc/") {
 				reverseProxyEngine.HandleContext(c)
+			} else if path == "/loading" {
+				c.JSON(http.StatusOK, map[string]interface{}{
+					"page": "/home",
+				})
 			} else {
 				assetEngine.HandleContext(c)
 			}
@@ -59,7 +101,6 @@ func NewRouter() *gin.Engine {
 		}
 
 		reverseProxy(c, remote)
-
 	})
 
 	return r
