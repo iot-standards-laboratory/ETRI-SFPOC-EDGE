@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"etri-sfpoc-edge/config"
 	"etri-sfpoc-edge/controller/state"
 	"net/http"
 	"net/http/httputil"
@@ -39,8 +40,29 @@ func NewInitRouter() *gin.Engine {
 			c.JSON(http.StatusOK, map[string]interface{}{
 				"page": "/init",
 			})
-		} else {
+
+		} else if path == "/init" && c.Request.Method == "POST" {
+			payload := map[string]interface{}{}
+			err := c.BindJSON(&payload)
+			if err != nil {
+				panic(err)
+			}
+
+			err = parameterCheck(payload, []string{"consulAddr", "mqttAddr"})
+			if err != nil {
+				panic(err)
+			}
+
+			c.Status(http.StatusOK)
+
+			config.Params["consulAddr"] = payload["consulAddr"]
+			config.Params["mqttAddr"] = payload["mqttAddr"]
+			state.Put(state.STATE_INITIALIZED)
+
+		} else if len(path) <= 1 || strings.Contains(c.Request.Header.Get("Referer"), "localhost:3000") {
 			assetEngine.HandleContext(c)
+		} else {
+			c.Status(http.StatusBadRequest)
 		}
 	})
 
@@ -70,7 +92,7 @@ func NewRunningRouter() *gin.Engine {
 	reverseProxyEngine.Any("/*any", reverseProxyHandle)
 
 	assetEngine := gin.New()
-	assetEngine.Static("/", "../ETRI-SFPOC-EDGE_front/web")
+	assetEngine.Static("/", "../ETRI-SFPOC-EDGE_front/build/web")
 
 	r := gin.New()
 	r.Any("/*any", func(c *gin.Context) {
@@ -82,7 +104,7 @@ func NewRunningRouter() *gin.Engine {
 		if err != nil {
 			c.String(http.StatusNoContent, "wrong host is indicated")
 			return
-			
+
 		}
 
 		if remote == nil {

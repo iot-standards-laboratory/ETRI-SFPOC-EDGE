@@ -1,6 +1,7 @@
 package router
 
 import (
+	"errors"
 	"etri-sfpoc-edge/config"
 	"etri-sfpoc-edge/logger"
 	"etri-sfpoc-edge/model/consulstorage"
@@ -16,6 +17,17 @@ func handleError(c *gin.Context) {
 		logger.Println(r)
 		c.String(http.StatusBadRequest, r.(error).Error())
 	}
+}
+
+func parameterCheck(payload map[string]interface{}, keys []string) error {
+	for _, k := range keys {
+		_, ok := payload[k]
+		if !ok {
+			return errors.New("invalid parameter error")
+		}
+	}
+
+	return nil
 }
 
 func connectionParams() map[string]interface{} {

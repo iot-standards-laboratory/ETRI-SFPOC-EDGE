@@ -1,6 +1,8 @@
 GET http://localhost:3000/api/v2/agents
 Content-Type: "application/json"
 
+POST http://localhost:3000/api/v2/agents/a17fe554-9027-4159-937d-2b238e0fb277
+
 POST http://localhost:3000/api/v2/ctrls/213f3570-9226-4e8c-bdd3-816bc6eee9e1
 Content-Type: "application/json"
 

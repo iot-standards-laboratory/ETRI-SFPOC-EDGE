@@ -1,0 +1,8 @@
+@serverAddr = localhost:3000
+POST http://{{serverAddr}}/init
+Content-Type: application/json
+
+{
+    "mqttAddr": "ws://localhost:9998",
+    "consulAddr": "http://localhost:9999"
+}

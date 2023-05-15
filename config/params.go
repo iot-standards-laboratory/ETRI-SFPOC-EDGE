@@ -18,19 +18,30 @@ func LoadConfig() {
 	Params["mqttAddr"] = p.GetString("mqttAddr", "ws://localhost:9998")
 }
 
-func CreateInitFile() {
+func CreateInitFile() error {
 	f, err := os.Create("./config.properties")
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer f.Close()
 
 	p := properties.NewProperties()
 
 	for k, v := range Params {
-		p.SetValue(k, v)
+		err = p.SetValue(k, v)
+		if err != nil {
+			panic(err)
+		}
 	}
-	p.SetValue("bind", ":3000")
+	err = p.SetValue("bind", ":3000")
+	if err != nil {
+		panic(err)
+	}
 
-	p.Write(f, properties.UTF8)
+	_, err = p.Write(f, properties.UTF8)
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
 }
