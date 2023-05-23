@@ -86,6 +86,8 @@ func NewRunningRouter() *gin.Engine {
 		apiv2.PUT("/svcs/*any", PutSvcs)
 		apiv2.POST("/svcs/*any", PostSvcs)
 		apiv2.DELETE("/svcs/*any", DeleteSvcs)
+
+		apiv2.GET("/home", GetHome)
 	}
 
 	reverseProxyEngine := gin.New()
