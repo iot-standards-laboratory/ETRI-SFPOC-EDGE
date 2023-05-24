@@ -7,5 +7,5 @@ import (
 )
 
 func GetHome(c *gin.Context) {
-	c.JSON(http.StatusOK, connectionParams())
+	c.JSON(http.StatusOK, connectionParams(c))
 }

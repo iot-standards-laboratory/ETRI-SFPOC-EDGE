@@ -27,7 +27,7 @@ func PostAgent(c *gin.Context) {
 		if err != nil {
 			panic(err)
 		}
-		params := connectionParams()
+		params := connectionParams(c)
 
 		addr, err := net.ResolveTCPAddr("tcp", c.Request.RemoteAddr)
 		if err != nil {

@@ -94,7 +94,7 @@ func PutSvcs(c *gin.Context) {
 	originAddr, _ := net.ResolveTCPAddr("tcp", c.Request.RemoteAddr)
 
 	payload := map[string]interface{}{
-		"conn_param": connectionParams(),
+		"conn_param": connectionParams(c),
 		"info":       m_svcInfo,
 		"origin":     originAddr.IP,
 	}
