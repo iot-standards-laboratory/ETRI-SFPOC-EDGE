@@ -94,7 +94,7 @@ func NewRunningRouter() *gin.Engine {
 	reverseProxyEngine.Any("/*any", reverseProxyHandle)
 
 	assetEngine := gin.New()
-	assetEngine.Static("/", "../ETRI-SFPOC-EDGE_front/build/web")
+	assetEngine.Static("/", "./www")
 
 	r := gin.New()
 	r.Any("/*any", func(c *gin.Context) {
