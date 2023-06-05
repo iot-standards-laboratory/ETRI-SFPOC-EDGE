@@ -59,7 +59,7 @@ func NewInitRouter() *gin.Engine {
 			config.Params["mqttAddr"] = payload["mqttAddr"]
 			state.Put(state.STATE_INITIALIZED)
 
-		} else if len(path) <= 1 || strings.Contains(c.Request.Header.Get("Referer"), "localhost:3000") {
+		} else if len(path) <= 1 || strings.HasSuffix(c.Request.Header.Get("Referer"), "/") {
 			assetEngine.HandleContext(c)
 		} else {
 			c.Status(http.StatusBadRequest)
