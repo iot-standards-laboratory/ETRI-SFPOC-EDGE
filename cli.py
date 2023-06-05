@@ -6,6 +6,7 @@ version = 'v0.1'
 def uninstallService():
     os.system('sudo systemctl disable sfpocedge.service')
     os.system('sudo rm /lib/systemd/system/sfpocedge.service')
+    os.system('sudo systemctl daemon-reload')
 
 def installService():
     serviceTemplate = '''[Unit]
@@ -43,11 +44,11 @@ if len(sys.argv) < 2:
     buildApp()
     installService()
 
-if sys.argv[1] == 'build':
+elif sys.argv[1] == 'build':
     buildApp()
 
-if sys.argv[1] == 'install':
+elif sys.argv[1] == 'install':
     installService()
 
-if sys.argv[1] == 'uninstall':
+elif sys.argv[1] == 'uninstall':
     uninstallService()
