@@ -2,3 +2,4 @@
 .docker/
 edge-app
 www/
+config.properties

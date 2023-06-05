@@ -25,7 +25,7 @@ func NewRouter(st state.IState) (*gin.Engine, error) {
 
 func NewInitRouter() *gin.Engine {
 	assetEngine := gin.New()
-	assetEngine.Static("/", "../ETRI-SFPOC-EDGE_front/web")
+	assetEngine.Static("/", "./www")
 
 	r := gin.New()
 	r.Any("/*any", func(c *gin.Context) {
