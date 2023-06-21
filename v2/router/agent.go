@@ -40,6 +40,19 @@ func PostAgent(c *gin.Context) {
 	}
 }
 
+func PutAgent(c *gin.Context) {
+	if len(c.Param("any")) <= 1 {
+		panic(errors.New("invalid agent id"))
+	}
+	id := c.Param("any")[1:]
+	err := DB.UpdateAgentWithJsonReader(id, c.Request.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	c.String(http.StatusOK, "text/plain", "OK")
+}
+
 func DeleteAgent(c *gin.Context) {
 	agent_id := c.Request.Header.Get("agent_id")
 

@@ -76,6 +76,7 @@ func NewRunningRouter() *gin.Engine {
 		// _ = apiv2
 		apiv2.POST("/agents/*any", PostAgent)
 		apiv2.GET("/agents/*any", GetAgent)
+		apiv2.PUT("/agents/*any", PutAgent)
 		apiv2.DELETE("/agents/*any", DeleteAgent)
 
 		apiv2.GET("/ctrls/*any", GetCtrl)

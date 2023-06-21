@@ -8,5 +8,6 @@ type I_DBHandler interface {
 	GetAgent(id string) (*Agent, error)
 	GetAgents() ([]*Agent, error)
 	DeleteAgent(id string) error
+	UpdateAgentWithJsonReader(id string, body io.ReadCloser) error
 	// IsExistController(cid string) bool
 }

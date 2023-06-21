@@ -25,3 +25,10 @@ GET http://localhost:3000/svc/1234
 
 DELETE https://etri.godopu.com/api/v2/svcs
 service_name: devicemanagera
+
+PUT http://localhost:3000/api/v2/agents/0b13c34a-d285-4a08-8c29-c25617552fb3
+Content-Type: application/json
+
+{
+    "name": "KNU-Agent"
+}

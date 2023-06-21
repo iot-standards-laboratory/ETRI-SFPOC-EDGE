@@ -82,6 +82,26 @@ func (s *_consulStorage) GetAgents() ([]*model.Agent, error) {
 	return list, nil
 }
 
+func (s *_consulStorage) UpdateAgentWithJsonReader(id string, body io.ReadCloser) error {
+	agent, err := s.GetAgent(id)
+	if err != nil {
+		return err
+	}
+
+	dec := json.NewDecoder(body)
+	err = dec.Decode(&agent)
+	if err != nil {
+		panic(err)
+	}
+
+	b, err := json.Marshal(agent)
+	if err != nil {
+		return err
+	}
+
+	return consulapi.Put(_getAgentKey(agent.ID), b)
+}
+
 // func (s *_DBHandler) IsExistAgent(id string) bool {
 // 	var controller = model.Controller{}
 
