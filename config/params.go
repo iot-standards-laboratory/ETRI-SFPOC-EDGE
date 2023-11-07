@@ -13,7 +13,7 @@ var Params = map[string]interface{}{}
 func LoadConfig() {
 
 	p := properties.MustLoadFile("./config.properties", properties.UTF8)
-	Params["bind"] = p.GetString("bind", ":3000")
+	Params["bind"] = p.GetString("bind", ":9910")
 	Params["consulAddr"] = p.GetString("consulAddr", "http://localhost:9999")
 	Params["mqttAddr"] = p.GetString("mqttAddr", "ws://localhost:9998")
 }
@@ -33,7 +33,7 @@ func CreateInitFile() error {
 			panic(err)
 		}
 	}
-	err = p.SetValue("bind", ":3000")
+	err = p.SetValue("bind", ":9910")
 	if err != nil {
 		panic(err)
 	}

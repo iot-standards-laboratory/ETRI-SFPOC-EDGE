@@ -26,7 +26,6 @@ func main() {
 	}
 
 	// go v2router.NewRouter().Run(config.Params["bind"].(string))
-
 	var srv *http.Server = nil
 
 	for currentState := range stateStream {
@@ -38,7 +37,7 @@ func main() {
 				panic(err)
 			}
 			srv = &http.Server{
-				Addr:    ":3000",
+				Addr:    ":9910",
 				Handler: mux,
 			}
 
@@ -95,7 +94,7 @@ func main() {
 			}
 
 			srv = &http.Server{
-				Addr:    ":3000",
+				Addr:    ":9910",
 				Handler: mux,
 			}
 			srv.ListenAndServe()

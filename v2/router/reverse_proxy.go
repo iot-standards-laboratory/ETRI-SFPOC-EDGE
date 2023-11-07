@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"etri-sfpoc-edge/consulapi"
 	"fmt"
 	"net/http"
@@ -9,10 +10,67 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-zoox/proxy"
 )
 
+var mqttReverseProxy http.Handler
+var consulReverseProxy http.Handler
+var serviceReverseProxy http.Handler
+
+func init() {
+	mqttReverseProxy = proxy.New(&proxy.Config{
+		OnRequest: func(req *http.Request, inReq *http.Request) error {
+			fmt.Println(inReq.Header.Get("Sec-Websocket-Protocol") == "mqtt")
+			req.URL.Host = "127.0.0.1:9998"
+			return nil
+		},
+		OnResponse: func(res *http.Response, inReq *http.Request) error {
+			fmt.Println(res)
+			return nil
+		},
+		OnError: func(err error, rw http.ResponseWriter, req *http.Request) {
+		},
+		OnContext: func(ctx context.Context) (context.Context, error) {
+			return ctx, nil
+		},
+		IsAnonymouse: false,
+	})
+
+	consulReverseProxy = proxy.New(&proxy.Config{
+		OnRequest: func(req *http.Request, inReq *http.Request) error {
+			req.URL.Host = "127.0.0.1:9999"
+			req.URL.Path = strings.TrimPrefix(req.URL.Path, "/consul")
+			return nil
+		},
+		OnResponse: func(res *http.Response, inReq *http.Request) error {
+
+			if res.StatusCode == http.StatusMovedPermanently && len(inReq.Referer()) == 0 {
+				res.Header.Set("Location", "/consul"+res.Header.Get("Location"))
+				fmt.Println(res.Header)
+				return nil
+			}
+
+			return nil
+		},
+		OnError: func(err error, rw http.ResponseWriter, req *http.Request) {
+		},
+		OnContext: func(ctx context.Context) (context.Context, error) {
+			return ctx, nil
+		},
+		IsAnonymouse: false,
+	})
+
+	serviceReverseProxy = proxy.New(&proxy.Config{
+		OnRequest: func(req *http.Request, inReq *http.Request) error {
+			fmt.Println("service reverse proxy")
+			fmt.Println(req.URL.Path)
+
+			return nil
+		},
+	})
+}
+
 func reverseProxyHandle(c *gin.Context) {
-	defer handleError(c)
 	path := c.Param("any")
 	id, _, ok := strings.Cut(path[5:], "/")
 	if !ok {
@@ -28,6 +86,8 @@ func reverseProxyHandle(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
+
+	// serviceReverseProxies[svcAddr]
 
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 	//Define the director func

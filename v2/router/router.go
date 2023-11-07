@@ -4,8 +4,8 @@ import (
 	"errors"
 	"etri-sfpoc-edge/config"
 	"etri-sfpoc-edge/controller/state"
+	"fmt"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"strings"
 
@@ -59,6 +59,8 @@ func NewInitRouter() *gin.Engine {
 			config.Params["mqttAddr"] = payload["mqttAddr"]
 			state.Put(state.STATE_INITIALIZED)
 
+		} else if path == "/mqtt" {
+
 		} else if len(path) <= 1 || strings.HasSuffix(c.Request.Header.Get("Referer"), "/") {
 			assetEngine.HandleContext(c)
 		} else {
@@ -103,58 +105,85 @@ func NewRunningRouter() *gin.Engine {
 		w := c.Writer
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		remote, err := getRemoteURL(c.Request.Host)
-		if err != nil {
-			c.String(http.StatusNoContent, "wrong host is indicated")
-			return
 
-		}
+		// remote, err := getRemoteURL(c.Request.Host)
+		// if err != nil {
+		// 	c.String(http.StatusNoContent, "wrong host is indicated")
+		// 	return
+		// }
 
-		if remote == nil {
-			path := c.Param("any")
-			if strings.HasPrefix(path, "/api/v2") {
-				apiEngine.HandleContext(c)
-			} else if strings.HasPrefix(path, "/svc/") {
-				reverseProxyEngine.HandleContext(c)
-			} else if path == "/loading" {
-				c.JSON(http.StatusOK, map[string]interface{}{
-					"page": "/home",
-				})
-			} else {
-				assetEngine.HandleContext(c)
-			}
+		handler := hasReferer(c)
+		if handler != nil {
+			handler.ServeHTTP(c.Writer, c.Request)
 			return
 		}
 
-		reverseProxy(c, remote)
+		path := c.Request.URL.Path
+		fmt.Println(c.Request.Referer())
+		fmt.Println(path)
+		if strings.HasPrefix(path, "/api/v2") {
+			apiEngine.HandleContext(c)
+		} else if strings.HasPrefix(path, "/svc/") {
+			reverseProxyEngine.HandleContext(c)
+		} else if strings.HasPrefix(path, "/consul") {
+			consulReverseProxy.ServeHTTP(c.Writer, c.Request)
+		} else if strings.HasPrefix(path, "/mqtt") {
+			mqttReverseProxy.ServeHTTP(c.Writer, c.Request)
+		} else if path == "/loading" {
+			c.JSON(http.StatusOK, map[string]interface{}{
+				"page": "/home",
+			})
+		} else {
+			assetEngine.HandleContext(c)
+		}
 	})
 
 	return r
 }
 
-func getRemoteURL(host string) (*url.URL, error) {
-	// return nil, nil
-
-	if !strings.HasPrefix(host, "svc.") {
-		return nil, nil
+func hasReferer(c *gin.Context) http.Handler {
+	referer := c.Request.Header.Get("Referer")
+	if referer == "" {
+		return nil
 	}
-	remote, err := url.Parse(host)
+
+	uri, err := url.Parse(referer)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
-	return remote, nil
-}
-
-func reverseProxy(c *gin.Context, remote *url.URL) {
-	rp := httputil.NewSingleHostReverseProxy(remote)
-	rp.Director = func(req *http.Request) {
-		req.Header = c.Request.Header
-		req.Host = remote.Host
-		req.URL.Scheme = remote.Scheme
-		req.URL.Host = remote.Host
-		req.URL.Path = c.Param("any")
+	fmt.Println("prefix:", uri.Path, "path:", c.Request.URL.Path)
+	if strings.HasPrefix(uri.Path, "/consul") || strings.HasPrefix(uri.Path, "/ui/consul") {
+		return consulReverseProxy
+	} else if strings.HasPrefix(uri.Path, "/svc") {
+		return serviceReverseProxy
 	}
 
-	rp.ServeHTTP(c.Writer, c.Request)
+	return nil
 }
+
+// func getRemoteURL(host string) (*url.URL, error) {
+// 	// return nil, nil
+// 	if !strings.HasPrefix(host, "svc.") {
+// 		return nil, nil
+// 	}
+// 	remote, err := url.Parse(host)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return remote, nil
+// }
+
+// func reverseProxy(c *gin.Context, remote *url.URL) {
+// 	rp := httputil.NewSingleHostReverseProxy(remote)
+// 	rp.Director = func(req *http.Request) {
+// 		req.Header = c.Request.Header
+// 		req.Host = remote.Host
+// 		req.URL.Scheme = remote.Scheme
+// 		req.URL.Host = remote.Host
+// 		req.URL.Path = c.Param("any")
+// 	}
+
+// 	rp.ServeHTTP(c.Writer, c.Request)
+// }
