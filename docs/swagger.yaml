@@ -1,0 +1,41 @@
+info:
+  contact: {}
+paths:
+  /init:
+    post:
+      consumes:
+      - application/json
+      description: 자세한 설명은 이곳에 적습니다.
+      parameters:
+      - description: test parameter
+        in: query
+        name: test
+        type: integer
+      - description: User ID and comma separated roles
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            consulAddr:
+              type: string
+            mqttAddr:
+              type: string
+          type: object
+      responses:
+        "200":
+          description: OK
+      summary: Summary를 적어 줍니다.
+  /loading:
+    get:
+      description: get params to load page.
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              page:
+                type: string
+            type: object
+      summary: get params to load page.
+swagger: "2.0"

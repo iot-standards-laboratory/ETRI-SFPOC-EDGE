@@ -2,7 +2,6 @@ package router
 
 import (
 	"errors"
-	"etri-sfpoc-edge/config"
 	"etri-sfpoc-edge/controller/state"
 	"fmt"
 	"net/http"
@@ -21,54 +20,6 @@ func NewRouter(st state.IState) (*gin.Engine, error) {
 	default:
 		return nil, errors.New("invalid state error")
 	}
-}
-
-func NewInitRouter() *gin.Engine {
-	assetEngine := gin.New()
-	assetEngine.Static("/", "./www")
-
-	r := gin.New()
-	r.Any("/*any", func(c *gin.Context) {
-		defer handleError(c)
-		w := c.Writer
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-
-		path := c.Param("any")
-		// assetEngine.HandleContext(c)
-		if path == "/loading" {
-			c.JSON(http.StatusOK, map[string]interface{}{
-				"page": "/init",
-			})
-
-		} else if path == "/init" && c.Request.Method == "POST" {
-			payload := map[string]interface{}{}
-			err := c.BindJSON(&payload)
-			if err != nil {
-				panic(err)
-			}
-
-			err = parameterCheck(payload, []string{"consulAddr", "mqttAddr"})
-			if err != nil {
-				panic(err)
-			}
-
-			c.Status(http.StatusOK)
-
-			config.Params["consulAddr"] = payload["consulAddr"]
-			config.Params["mqttAddr"] = payload["mqttAddr"]
-			state.Put(state.STATE_INITIALIZED)
-
-		} else if path == "/mqtt" {
-
-		} else if len(path) <= 1 || strings.HasSuffix(c.Request.Header.Get("Referer"), "/") {
-			assetEngine.HandleContext(c)
-		} else {
-			c.Status(http.StatusBadRequest)
-		}
-	})
-
-	return r
 }
 
 func NewRunningRouter() *gin.Engine {
