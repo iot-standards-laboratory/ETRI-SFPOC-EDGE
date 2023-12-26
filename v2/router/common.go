@@ -4,7 +4,7 @@ import (
 	"errors"
 	"etri-sfpoc-edge/config"
 	"etri-sfpoc-edge/logger"
-	"etri-sfpoc-edge/model/consulstorage"
+	"etri-sfpoc-edge/model/supabasedb"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var DB = consulstorage.DefaultDB
+var DB = supabasedb.DefaultDB
 
 func handleError(c *gin.Context) {
 	if r := recover(); r != nil {

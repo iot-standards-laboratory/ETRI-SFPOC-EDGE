@@ -1,16 +1,16 @@
-GET http://localhost:9988/login
+POST http://localhost:9995/api/v2/ctrls
 Content-Type: "application/json"
 
-Joong-Hwa
+{
+    "name": "ETRI-Controller-5"
+}
 
-GET http://localhost:9988/chat
-Content-Type: "application/json"
-Cookie: session_name=MTY2NzU0ODQ5NXxEdi1CQkFFQ180SUFBUkFCRUFBQUpfLUNBQUVHYzNSeWFXNW5EQVlBQkhWelpYSUdjM1J5YVc1bkRBc0FDVXB2YjI1bkxVaDNZUT09fIoY-uz5317pVKa03tMgEyVUB_dE_NGqo1fPfZpuRbZe
+POST http://localhost:9995/api/v2/svcs
+Content-Type: application/json
 
-Joong-Hwa
+{
+    "msg": "Hello world"
+}
 
-GET http://localhost:9988/
-Content-Type: "application/json"
-
-GET http://localhost:3000/api/v2/ctrls
-service_name: devicemanagera
+PUT http://localhost:9995/api/v2/svcs
+id: "51b59a4f-ec0b-49fd-ac6d-e3e7a2c07ec4"

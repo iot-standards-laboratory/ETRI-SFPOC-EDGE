@@ -108,10 +108,12 @@ func registerEntity(name, endpoint string) (err error) {
 	if err != nil {
 		return
 	}
+
 	host, port, err := net.SplitHostPort(uri.Host)
 	if err != nil {
 		return
 	}
+
 	port_i, err := strconv.ParseInt(port, 10, 32)
 	if err != nil {
 		return

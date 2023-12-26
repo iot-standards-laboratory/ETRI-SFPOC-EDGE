@@ -2,7 +2,7 @@ package router
 
 import (
 	"context"
-	"etri-sfpoc-edge/consulapi"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-zoox/proxy"
+	"github.com/google/uuid"
 )
 
 var mqttReverseProxy http.Handler
@@ -62,9 +63,27 @@ func init() {
 
 	serviceReverseProxy = proxy.New(&proxy.Config{
 		OnRequest: func(req *http.Request, inReq *http.Request) error {
-			fmt.Println("service reverse proxy")
-			fmt.Println(req.URL.Path)
+			path := req.URL.Path
+			sid, found := strings.CutPrefix(path, "/svc/")
+			if !found {
+				panic(errors.New("invalid service error"))
+			}
 
+			idx := strings.Index(sid, "/")
+			if idx != -1 {
+				sid = sid[:idx]
+			}
+			id, err := uuid.Parse(sid)
+			if err != nil {
+				panic(err)
+			}
+			svc, err := DB.SelectSvc(id)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(svc)
+			req.URL.Host = fmt.Sprintf("%s:3456", svc.Addr)
+			// req.URL.Path = strings.TrimPrefix(req.URL.Path, "/consul")
 			return nil
 		},
 	})
@@ -76,11 +95,10 @@ func reverseProxyHandle(c *gin.Context) {
 	if !ok {
 		id = path[5:]
 	}
+	fmt.Println("id:", id)
 
-	svcAddr, err := consulapi.GetSvcAddr(fmt.Sprintf("svcs/%s", id))
-	if err != nil {
-		panic(err)
-	}
+	// svcAddr, err := consulapi.GetSvcAddr(fmt.Sprintf("svcs/%s", id))
+	svcAddr := "127.0.0.1:3456"
 
 	remote, err := url.Parse("http://" + svcAddr)
 	if err != nil {

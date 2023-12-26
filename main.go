@@ -7,8 +7,6 @@ import (
 	"etri-sfpoc-edge/consulapi"
 	"etri-sfpoc-edge/controller/connmgmt"
 	"etri-sfpoc-edge/controller/state"
-	"etri-sfpoc-edge/model/consulstorage"
-	"etri-sfpoc-edge/mqtthandler"
 	"etri-sfpoc-edge/v2/router"
 	"fmt"
 	"log"
@@ -37,7 +35,7 @@ func main() {
 				panic(err)
 			}
 			srv = &http.Server{
-				Addr:    ":9910",
+				Addr:    ":9995",
 				Handler: mux,
 			}
 
@@ -65,28 +63,28 @@ func main() {
 				panic(err)
 			}
 
-			go consulapi.Monitor(func(what string) {
-				if strings.Contains(what, "Synced check") {
-					agents, err := consulstorage.DefaultDB.GetAgents()
-					if err != nil {
-						return
-					}
-					for _, agent := range agents {
-						status, err := consulapi.GetStatus(fmt.Sprintf("agent/%s", agent.ID))
-						if err != nil {
-							return
-						}
+			// go consulapi.Monitor(func(what string) {
+			// 	if strings.Contains(what, "Synced check") {
+			// 		// agents, err := consulstorage.DefaultDB.GetAgents()
+			// 		if err != nil {
+			// 			return
+			// 		}
+			// 		for _, agent := range agents {
+			// 			status, err := consulapi.GetStatus(fmt.Sprintf("agent/%s", agent.ID))
+			// 			if err != nil {
+			// 				return
+			// 			}
 
-						if strings.Compare(status, "passing") != 0 {
-							err := removeCtrlsWithAgentId(agent.ID)
-							if err != nil {
-								return
-							}
-						}
-					}
-					mqtthandler.Publish("public/statuschanged", []byte("changed"))
-				}
-			}, context.Background())
+			// 			if strings.Compare(status, "passing") != 0 {
+			// 				err := removeCtrlsWithAgentId(agent.ID)
+			// 				if err != nil {
+			// 					return
+			// 				}
+			// 			}
+			// 		}
+			// 		mqtthandler.Publish("public/statuschanged", []byte("changed"))
+			// 	}
+			// }, context.Background())
 
 			mux, err := router.NewRouter(state.STATE_RUNNING)
 			if err != nil {
@@ -94,7 +92,7 @@ func main() {
 			}
 
 			srv = &http.Server{
-				Addr:    ":9910",
+				Addr:    ":9995",
 				Handler: mux,
 			}
 			srv.ListenAndServe()

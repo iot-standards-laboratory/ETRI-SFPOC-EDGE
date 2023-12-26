@@ -1,11 +1,11 @@
 package consulstorage
 
-import "etri-sfpoc-edge/model"
+// import "etri-sfpoc-edge/model"
 
-var DefaultDB model.I_DBHandler = nil
+// var DefaultDB model.I_DBHandler = nil
 
-type _consulStorage struct{}
+// type _consulStorage struct{}
 
-func init() {
-	DefaultDB = &_consulStorage{}
-}
+// func init() {
+// 	DefaultDB = &_consulStorage{}
+// }

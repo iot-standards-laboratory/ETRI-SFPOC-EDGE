@@ -61,66 +61,18 @@ func PostCtrl(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	agentId, ok := payload["agent_id"].(string)
+
+	ctrlName, ok := payload["name"].(string)
 	if !ok {
 		panic(errors.New("invalid agent id error"))
 	}
 
-	svcName, ok := payload["service_name"].(string)
-	if !ok {
-		panic(errors.New("invalid service name error"))
-	}
-
-	svcId, ok := payload["service_id"].(string)
-	// please check service id
-	if !ok {
-		panic(errors.New("invalid service id error"))
-	}
-
-	ctrlId, ok := payload["id"].(string)
-	if !ok {
-		panic(errors.New("invalid controller id error"))
-	}
-
-	json_payload, _ := json.Marshal(payload)
-	err = consulapi.Put(
-		fmt.Sprintf("agentCtrls/%s/%s", agentId, ctrlId),
-		json_payload,
-	)
+	ctrl, err := DB.InsertCtrl(ctrlName)
 	if err != nil {
 		panic(err)
 	}
 
-	err = consulapi.Put(
-		fmt.Sprintf("svcCtrls/%s/%s/%s", svcId, agentId, ctrlId),
-		json_payload,
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	svcJson, err := json.Marshal(map[string]interface{}{
-		"name": svcName,
-		"id":   svcId,
-		"cid":  "",
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	b, err := consulapi.Get(fmt.Sprintf("svcs/%s", svcId))
-	if b == nil || err != nil {
-		err = consulapi.Put(
-			fmt.Sprintf("svcs/%s", svcId),
-			svcJson,
-		)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	mqtthandler.Publish("public/statuschanged", []byte("changed"))
-	c.String(http.StatusOK, "OK")
+	c.JSON(http.StatusOK, ctrl)
 }
 
 func DeleteCtrl(c *gin.Context) {

@@ -27,18 +27,12 @@ func NewRunningRouter() *gin.Engine {
 	apiv2 := apiEngine.Group("api/v2")
 	{
 		// _ = apiv2
-		apiv2.POST("/agents/*any", PostAgent)
-		apiv2.GET("/agents/*any", GetAgent)
-		apiv2.PUT("/agents/*any", PutAgent)
-		apiv2.DELETE("/agents/*any", DeleteAgent)
-
 		apiv2.GET("/ctrls/*any", GetCtrl)
 		apiv2.POST("/ctrls/*any", PostCtrl)
 		apiv2.DELETE("/ctrls/*any", DeleteCtrl)
 
-		apiv2.GET("/svcs/*any", GetSvcs)
 		apiv2.PUT("/svcs/*any", PutSvcs)
-		apiv2.POST("/svcs/*any", PostSvcs)
+		apiv2.POST("/svcs", PostSvcs)
 		apiv2.DELETE("/svcs/*any", DeleteSvcs)
 
 		apiv2.GET("/home", GetHome)
@@ -75,7 +69,7 @@ func NewRunningRouter() *gin.Engine {
 		if strings.HasPrefix(path, "/api/v2") {
 			apiEngine.HandleContext(c)
 		} else if strings.HasPrefix(path, "/svc/") {
-			reverseProxyEngine.HandleContext(c)
+			serviceReverseProxy.ServeHTTP(c.Writer, c.Request)
 		} else if strings.HasPrefix(path, "/consul") {
 			consulReverseProxy.ServeHTTP(c.Writer, c.Request)
 		} else if strings.HasPrefix(path, "/mqtt") {
